@@ -7,7 +7,7 @@ const SettingsPage = () => {
   const { darkMode, toggleDarkMode } = useAuth();
   
   // Organization settings
-  const [orgName, setOrgName] = useState(localStorage.getItem('orgName') || 'Shaad-Mates WebSuite');
+  const [orgName, setOrgName] = useState(localStorage.getItem('orgName') || 'Shaad-Mates Website');
   const [orgLogo, setOrgLogo] = useState(localStorage.getItem('orgLogo') || '🎓');
   const [orgEmail, setOrgEmail] = useState(localStorage.getItem('orgEmail') || 'admin@shaadmates.com');
   const [signatureUrl, setSignatureUrl] = useState('');
@@ -27,13 +27,13 @@ const SettingsPage = () => {
       try {
         const res = await api.get('/admin/settings');
         if (res.data) {
-          setOrgName(res.data.orgName || 'Shaad-Mates WebSuite');
+          setOrgName(res.data.orgName || 'Shaad-Mates Website');
           setOrgLogo(res.data.orgLogo || '🎓');
           setOrgEmail(res.data.orgEmail || 'admin@shaadmates.com');
           setSignatureUrl(res.data.signatureUrl || '');
           
           // Sync to localStorage
-          localStorage.setItem('orgName', res.data.orgName || 'Shaad-Mates WebSuite');
+          localStorage.setItem('orgName', res.data.orgName || 'Shaad-Mates Website');
           localStorage.setItem('orgLogo', res.data.orgLogo || '🎓');
           localStorage.setItem('orgEmail', res.data.orgEmail || 'admin@shaadmates.com');
           localStorage.setItem('signatureUrl', res.data.signatureUrl || '');
@@ -118,7 +118,7 @@ const SettingsPage = () => {
       <div className="glass-card border rounded-3xl p-6 shadow-xl space-y-6">
         <div className="flex items-center space-x-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
           <Settings className="text-royal animate-spin-slow" />
-          <h3 className="text-lg font-bold font-sans">Advanced WebSuite Console</h3>
+          <h3 className="text-lg font-bold font-sans">Advanced Website Console</h3>
         </div>
 
         {errorMsg && (
@@ -276,7 +276,7 @@ const SettingsPage = () => {
         <div className="divide-y divide-slate-100 dark:divide-slate-850">
           <div className="py-2 flex justify-between">
             <span className="text-slate-500">System Name</span>
-            <span className="font-semibold">Shaad-Mates ERP WebSuite</span>
+            <span className="font-semibold">Shaad-Mates ERP Website</span>
           </div>
           <div className="py-2 flex justify-between">
             <span className="text-slate-500">Version</span>

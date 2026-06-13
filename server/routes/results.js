@@ -1,7 +1,5 @@
 import express from 'express';
-import Result from '../models/Result.js';
-import Certificate from '../models/Certificate.js';
-import SystemSetting from '../models/SystemSetting.js';
+import prisma from '../db.js';
 
 const router = express.Router();
 
@@ -9,9 +7,9 @@ const router = express.Router();
 // @desc    Get public system settings (branding, signature URL)
 router.get('/settings', async (req, res) => {
   try {
-    let settings = await SystemSetting.findOne();
+    let settings = await prisma.systemSetting.findFirst();
     if (!settings) {
-      settings = await SystemSetting.create({});
+      settings = await prisma.systemSetting.create({ data: {} });
     }
     res.json(settings);
   } catch (error) {
@@ -23,18 +21,37 @@ router.get('/settings', async (req, res) => {
 // @desc    Get results standings for a specific program
 router.get('/:programId', async (req, res) => {
   try {
-    const result = await Result.findOne({ programId: req.params.programId })
-      .populate('winners.studentId')
-      .populate({
-        path: 'winners.groupId',
-        populate: { path: 'members' }
-      });
+    const result = await prisma.result.findFirst({
+      where: { programId: req.params.programId },
+      include: {
+        winners: {
+          include: {
+            student: true,
+            group: {
+              include: {
+                members: true
+              }
+            }
+          }
+        }
+      }
+    });
 
     if (!result) {
       return res.status(404).json({ message: 'Standings results not yet published for this program.' });
     }
 
-    res.json(result);
+    // Map relationships to match mongoose populated field names
+    const mappedResult = {
+      ...result,
+      winners: result.winners.map(w => ({
+        ...w,
+        studentId: w.student,
+        groupId: w.group
+      }))
+    };
+
+    res.json(mappedResult);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching standings results.', error: error.message });
   }
@@ -44,15 +61,26 @@ router.get('/:programId', async (req, res) => {
 // @desc    Verify a certificate's authenticity by ID (public, only if approved)
 router.get('/certificate/verify/:certId', async (req, res) => {
   try {
-    const cert = await Certificate.findOne({ certificateId: req.params.certId, approved: true })
-      .populate('studentId')
-      .populate('programId');
+    const cert = await prisma.certificate.findFirst({
+      where: { certificateId: req.params.certId, approved: true },
+      include: {
+        student: true,
+        program: true
+      }
+    });
 
     if (!cert) {
       return res.status(404).json({ message: 'Certificate not found or not yet approved. Verification failed.' });
     }
 
-    res.json(cert);
+    // Map relationships to match mongoose populated field names
+    const mappedCert = {
+      ...cert,
+      studentId: cert.student,
+      programId: cert.program
+    };
+
+    res.json(mappedCert);
   } catch (error) {
     res.status(500).json({ message: 'Error verifying certificate authenticity.', error: error.message });
   }
@@ -62,9 +90,18 @@ router.get('/certificate/verify/:certId', async (req, res) => {
 // @desc    Get all wings with chairman populated for public landing page
 router.get('/wings/list', async (req, res) => {
   try {
-    const Wing = (await import('../models/Wing.js')).default;
-    const wings = await Wing.find().populate('chairmanId');
-    res.json(wings);
+    const wings = await prisma.wing.findMany({
+      include: {
+        chairman: true
+      }
+    });
+    
+    const mappedWings = wings.map(w => ({
+      ...w,
+      chairmanId: w.chairman
+    }));
+    
+    res.json(mappedWings);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving wings.' });
   }

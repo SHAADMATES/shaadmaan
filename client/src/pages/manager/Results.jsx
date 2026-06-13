@@ -171,7 +171,7 @@ const ManagerResults = () => {
 
       await api.post('/chairman/results', payload);
       setToastType('success');
-      setToastMessage('Results standings successfully published to WebSuite registry!');
+      setToastMessage('Results standings successfully published to Website registry!');
       
       // Refresh
       setSelectedProgramId('');

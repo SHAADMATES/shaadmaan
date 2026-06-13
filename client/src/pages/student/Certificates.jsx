@@ -194,7 +194,7 @@ const Certificates = () => {
               <div className="flex justify-center items-center space-x-2">
                 <span className="text-4xl">🎓</span>
                 <span className="text-xl font-bold font-sans tracking-wide text-slate-800 uppercase">
-                  {localStorage.getItem('orgName') || 'Shaad-Mates WebSuite'}
+                  {localStorage.getItem('orgName') || 'Shaad-Mates Website'}
                 </span>
               </div>
 

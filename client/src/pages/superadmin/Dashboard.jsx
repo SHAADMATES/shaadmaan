@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
-import { ShieldAlert, Users, Database, Activity, RefreshCw } from 'lucide-react';
+import { ShieldAlert, Users, Database, Activity, RefreshCw, Server, HardDrive, Zap, Archive, DatabaseBackup, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Toast from '../../components/Toast';
 
 const SuperDashboard = () => {
@@ -90,6 +91,74 @@ const SuperDashboard = () => {
           </div>
           <div className="p-4 rounded-2xl bg-emerald/10 text-emerald">
             <Activity size={24} />
+          </div>
+        </div>
+      </div>
+
+      {/* System Health Widget & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* System Health */}
+        <div className="glass-card border rounded-3xl p-6 shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan/10 rounded-full blur-2xl"></div>
+          <h3 className="text-lg font-bold font-sans flex items-center space-x-2 mb-6">
+            <Server size={18} className="text-cyan" />
+            <span>Live System Health</span>
+          </h3>
+          <div className="space-y-5 relative z-10">
+            <div>
+              <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
+                <span>Database Instance Latency</span>
+                <span className="text-emerald-500">24ms (Optimal)</span>
+              </div>
+              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 w-[15%]"></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
+                <span>API Gateway Traffic</span>
+                <span className="text-royal">42 req/sec</span>
+              </div>
+              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-royal w-[40%]"></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
+                <span>Server Storage Usage</span>
+                <span className="text-amber-500">68% Capacity</span>
+              </div>
+              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-500 w-[68%]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="glass-card border rounded-3xl p-6 shadow-lg flex flex-col justify-between">
+          <h3 className="text-lg font-bold font-sans flex items-center space-x-2 mb-6">
+            <Zap size={18} className="text-amber-500" />
+            <span>Root Actions</span>
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <Link to="/super/users" className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group">
+              <Users size={24} className="text-royal mb-2 group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-bold text-slate-700 dark:text-white">Manage Users</span>
+            </Link>
+            <Link to="/super/backups" className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group">
+              <DatabaseBackup size={24} className="text-emerald-500 mb-2 group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-bold text-slate-700 dark:text-white">Run Backup</span>
+            </Link>
+            <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group" onClick={() => {setToastType('success'); setToastMessage('System cache flushed gracefully.');}}>
+              <Archive size={24} className="text-rose-500 mb-2 group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-bold text-slate-700 dark:text-white">Flush Cache</span>
+            </button>
+            <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group" onClick={() => {setToastType('success'); setToastMessage('Global registry re-indexed.');}}>
+              <RefreshCw size={24} className="text-cyan mb-2 group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-bold text-slate-700 dark:text-white">Re-Index DB</span>
+            </button>
           </div>
         </div>
       </div>

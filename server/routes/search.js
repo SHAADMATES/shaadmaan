@@ -1,9 +1,6 @@
 import express from 'express';
 import { protect } from '../middleware/auth.js';
-import Student from '../models/Student.js';
-import Program from '../models/Program.js';
-import Certificate from '../models/Certificate.js';
-import Library from '../models/Library.js';
+import prisma from '../db.js';
 
 const router = express.Router();
 
@@ -19,19 +16,54 @@ router.get('/', async (req, res) => {
   }
 
   try {
-    const regex = new RegExp(query, 'i');
+    const searchParam = `%${query}%`;
 
     const [students, programs, certificates, books] = await Promise.all([
-      Student.find({ $or: [{ name: regex }, { studentId: regex }] }).limit(5),
-      Program.find({ $or: [{ title: regex }, { venue: regex }] }).limit(5),
-      Certificate.find({ certificateId: regex }).populate('studentId').populate('programId').limit(5),
-      Library.find({ $or: [{ title: regex }, { author: regex }] }).limit(5)
+      prisma.student.findMany({
+        where: {
+          OR: [
+            { name: { contains: query } },
+            { studentId: { contains: query } }
+          ]
+        },
+        take: 5
+      }),
+      prisma.program.findMany({
+        where: {
+          OR: [
+            { title: { contains: query } },
+            { venue: { contains: query } }
+          ]
+        },
+        take: 5
+      }),
+      prisma.certificate.findMany({
+        where: { certificateId: { contains: query } },
+        include: { student: true, program: true },
+        take: 5
+      }),
+      prisma.library.findMany({
+        where: {
+          OR: [
+            { title: { contains: query } },
+            { author: { contains: query } }
+          ]
+        },
+        take: 5
+      })
     ]);
+
+    // Map relationships to match mongoose populated field names if frontend expects them
+    const mappedCertificates = certificates.map(c => ({
+      ...c,
+      studentId: c.student,
+      programId: c.program
+    }));
 
     res.json({
       students,
       programs,
-      certificates,
+      certificates: mappedCertificates,
       books
     });
   } catch (error) {

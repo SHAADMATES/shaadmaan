@@ -2,10 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { protect } from '../middleware/auth.js';
-import User from '../models/User.js';
-import Student from '../models/Student.js';
-import WingChairman from '../models/WingChairman.js';
-import AuditLog from '../models/AuditLog.js';
+import prisma from '../db.js';
 
 const router = express.Router();
 
@@ -19,36 +16,38 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ username });
+    const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
-      await AuditLog.create({ action: 'FAILED_LOGIN', details: `Unregistered username: ${username}` });
+      await prisma.auditLog.create({ data: { action: 'FAILED_LOGIN', details: `Unregistered username: ${username}` } });
       return res.status(401).json({ message: 'Invalid credentials. User does not exist.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      await AuditLog.create({ userId: user._id, username: user.username, action: 'FAILED_LOGIN', details: 'Incorrect password.' });
+      await prisma.auditLog.create({ data: { userId: user.id, username: user.username, action: 'FAILED_LOGIN', details: 'Incorrect password.' } });
       return res.status(401).json({ message: 'Invalid credentials. Incorrect password.' });
     }
 
     const token = jwt.sign(
-      { id: user._id, username: user.username, role: user.role },
+      { id: user.id, username: user.username, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
     // Write successful login trace to audit log
-    await AuditLog.create({
-      userId: user._id,
-      username: user.username,
-      action: 'USER_LOGIN',
-      details: `Signed in successfully as ${user.role}.`
+    await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        username: user.username,
+        action: 'USER_LOGIN',
+        details: `Signed in successfully as ${user.role}.`
+      }
     });
 
     res.json({
       token,
       user: {
-        _id: user._id,
+        _id: user.id, // Using _id for frontend compatibility
         username: user.username,
         role: user.role
       }
@@ -63,11 +62,11 @@ router.post('/login', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   const { username } = req.body;
   try {
-    const user = await User.findOne({ username });
+    const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
-    await AuditLog.create({ userId: user._id, username: user.username, action: 'FORGOT_PASSWORD_REQUESTED' });
+    await prisma.auditLog.create({ data: { userId: user.id, username: user.username, action: 'FORGOT_PASSWORD_REQUESTED' } });
     res.json({ message: 'Password reset link dispatched. Please check your inbox.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -79,13 +78,16 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   const { username, newPassword } = req.body;
   try {
-    const user = await User.findOne({ username });
+    const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-    await AuditLog.create({ userId: user._id, username: user.username, action: 'PASSWORD_RESET_SUCCESSFUL' });
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword, plainPassword: newPassword }
+    });
+    await prisma.auditLog.create({ data: { userId: user.id, username: user.username, action: 'PASSWORD_RESET_SUCCESSFUL' } });
     res.json({ message: 'Password updated successfully.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -100,9 +102,9 @@ router.get('/profile', protect, async (req, res) => {
     let profileDetails = null;
 
     if (user.role === 'student') {
-      profileDetails = await Student.findOne({ userId: user._id });
+      profileDetails = await prisma.student.findUnique({ where: { userId: user.id } });
     } else if (user.role === 'wing_chairman') {
-      profileDetails = await WingChairman.findOne({ userId: user._id });
+      profileDetails = await prisma.wingChairman.findUnique({ where: { userId: user.id } });
     } else if (user.role === 'treasurer') {
       profileDetails = { name: 'Treasurer Desk', wing: 'Finance' };
     } else if (user.role === 'admin' || user.role === 'super_admin') {
@@ -111,7 +113,7 @@ router.get('/profile', protect, async (req, res) => {
 
     res.json({
       user: {
-        _id: user._id,
+        _id: user.id, // Compatibility
         username: user.username,
         role: user.role
       },
@@ -135,7 +137,7 @@ router.put('/change-password', protect, async (req, res) => {
   }
 
   try {
-    const user = await User.findById(req.user._id);
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
@@ -143,27 +145,34 @@ router.put('/change-password', protect, async (req, res) => {
       return res.status(401).json({ message: 'Current password is incorrect.' });
     }
 
+    const updateData = {};
+
     if (newUsername && newUsername !== user.username) {
-      const taken = await User.findOne({ username: newUsername });
+      const taken = await prisma.user.findUnique({ where: { username: newUsername } });
       if (taken) return res.status(400).json({ message: 'Username already taken.' });
-      user.username = newUsername;
+      updateData.username = newUsername;
     }
 
     if (newPassword) {
       if (newPassword.length < 6) {
         return res.status(400).json({ message: 'New password must be at least 6 characters.' });
       }
-      user.password = await bcrypt.hash(newPassword, 10);
-      user.plainPassword = newPassword;
+      updateData.password = await bcrypt.hash(newPassword, 10);
+      updateData.plainPassword = newPassword;
     }
 
-    await user.save();
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: updateData
+    });
 
-    await AuditLog.create({
-      userId: user._id,
-      username: user.username,
-      action: 'SELF_PASSWORD_CHANGE',
-      details: `User @${user.username} updated their own credentials.`
+    await prisma.auditLog.create({
+      data: {
+        userId: updatedUser.id,
+        username: updatedUser.username,
+        action: 'SELF_PASSWORD_CHANGE',
+        details: `User @${updatedUser.username} updated their own credentials.`
+      }
     });
 
     res.json({ message: 'Credentials updated successfully. Please login again with new credentials.' });

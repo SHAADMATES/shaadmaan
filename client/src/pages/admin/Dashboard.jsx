@@ -13,7 +13,9 @@ import {
   BookOpen,
   Circle,
   ArrowUpRight,
-  Shield
+  ArrowDownRight,
+  Shield,
+  DollarSign
 } from 'lucide-react';
 import Toast from '../../components/Toast';
 
@@ -177,6 +179,35 @@ const Dashboard = () => {
 
       {/* Detail Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Treasury Overview (New Finance Tracking) */}
+        <div className="lg:col-span-3 p-6 rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="absolute right-0 top-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="z-10 text-white space-y-2">
+            <h3 className="text-xl font-bold flex items-center space-x-2">
+              <DollarSign className="text-emerald-400" />
+              <span>Treasury Overview</span>
+            </h3>
+            <p className="text-sm text-slate-400 max-w-md">Live monitoring of financial ledgers. Track gross incomes, expenses, and total available balance directly from the admin console.</p>
+          </div>
+          <div className="z-10 flex gap-4 w-full md:w-auto">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex-1 md:w-40 text-center">
+              <p className="text-xs font-semibold text-emerald-400 mb-1 flex items-center justify-center"><ArrowUpRight size={14} className="mr-1"/> Income</p>
+              <p className="text-xl font-mono font-bold text-white">${(stats?.totalIncome || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex-1 md:w-40 text-center">
+              <p className="text-xs font-semibold text-rose-400 mb-1 flex items-center justify-center"><ArrowDownRight size={14} className="mr-1"/> Expense</p>
+              <p className="text-xl font-mono font-bold text-white">-${(stats?.totalExpense || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+            </div>
+            <div className={`backdrop-blur-md rounded-2xl p-4 border flex-1 md:w-40 text-center ${(stats?.totalIncome || 0) - (stats?.totalExpense || 0) >= 0 ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-rose-500/20 border-rose-500/30'}`}>
+              <p className="text-xs font-semibold text-white/70 mb-1">Net Balance</p>
+              <p className={`text-xl font-mono font-bold ${(stats?.totalIncome || 0) - (stats?.totalExpense || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                ${Math.abs((stats?.totalIncome || 0) - (stats?.totalExpense || 0)).toLocaleString(undefined, {minimumFractionDigits: 2})}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Recent Programs */}
         <div className="lg:col-span-2 p-6 rounded-3xl glass-card border space-y-5 shadow-lg">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">

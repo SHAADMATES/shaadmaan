@@ -1,7 +1,6 @@
 import express from 'express';
 import { protect, authorize } from '../middleware/auth.js';
-import Finance from '../models/Finance.js';
-import Program from '../models/Program.js';
+import prisma from '../db.js';
 
 const router = express.Router();
 
@@ -11,7 +10,7 @@ router.use(protect, authorize('treasurer'));
 // @desc    Retrieve overall finance overview statistics
 router.get('/stats', async (req, res) => {
   try {
-    const transactions = await Finance.find();
+    const transactions = await prisma.finance.findMany();
     
     let totalIncome = 0;
     let totalExpense = 0;
@@ -38,10 +37,21 @@ router.get('/stats', async (req, res) => {
 // @desc    Get all transactions
 router.get('/transactions', async (req, res) => {
   try {
-    const transactions = await Finance.find()
-      .sort({ date: -1 })
-      .populate('programId', 'title');
-    res.json(transactions);
+    const transactions = await prisma.finance.findMany({
+      orderBy: { date: 'desc' },
+      include: {
+        program: {
+          select: { title: true }
+        }
+      }
+    });
+    
+    const mappedTransactions = transactions.map(t => ({
+      ...t,
+      programId: t.program
+    }));
+    
+    res.json(mappedTransactions);
   } catch (error) {
     res.status(500).json({ message: 'Failed to retrieve transactions.' });
   }
@@ -57,13 +67,15 @@ router.post('/transactions', async (req, res) => {
   }
 
   try {
-    const transaction = await Finance.create({
-      type,
-      category,
-      amount: Number(amount),
-      description,
-      date: date || Date.now(),
-      programId: programId || null
+    const transaction = await prisma.finance.create({
+      data: {
+        type,
+        category,
+        amount: Number(amount),
+        description: description || '',
+        date: date ? new Date(date) : new Date(),
+        programId: programId || null
+      }
     });
     res.status(201).json(transaction);
   } catch (error) {
@@ -75,7 +87,9 @@ router.post('/transactions', async (req, res) => {
 // @desc    Delete a transaction
 router.delete('/transactions/:id', async (req, res) => {
   try {
-    await Finance.findByIdAndDelete(req.params.id);
+    await prisma.finance.delete({
+      where: { id: req.params.id }
+    });
     res.json({ message: 'Transaction record deleted successfully.' });
   } catch (error) {
     res.status(500).json({ message: 'Failed to delete transaction.' });
@@ -86,9 +100,24 @@ router.delete('/transactions/:id', async (req, res) => {
 // @desc    Get expenses linked to programs
 router.get('/program-expenses', async (req, res) => {
   try {
-    const expenses = await Finance.find({ type: 'expense', programId: { $ne: null } })
-      .populate('programId', 'title wing');
-    res.json(expenses);
+    const expenses = await prisma.finance.findMany({
+      where: {
+        type: 'expense',
+        programId: { not: null }
+      },
+      include: {
+        program: {
+          select: { title: true, wing: true }
+        }
+      }
+    });
+    
+    const mappedExpenses = expenses.map(e => ({
+      ...e,
+      programId: e.program
+    }));
+    
+    res.json(mappedExpenses);
   } catch (error) {
     res.status(500).json({ message: 'Failed to load program expenses.' });
   }
@@ -98,7 +127,7 @@ router.get('/program-expenses', async (req, res) => {
 // @desc    Get all programs for transaction selection
 router.get('/programs', async (req, res) => {
   try {
-    const programs = await Program.find();
+    const programs = await prisma.program.findMany();
     res.json(programs);
   } catch (error) {
     res.status(500).json({ message: 'Failed to load programs list.' });

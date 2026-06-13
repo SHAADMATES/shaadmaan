@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../context/AuthContext';
 import { FileSpreadsheet, Printer, Calendar, DollarSign, ArrowUpRight, ArrowDownRight, RefreshCw, BarChart2 } from 'lucide-react';
 import Toast from '../../components/Toast';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const FinanceReports = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
+  const reportRef = useRef(null);
   
   // Date range filters
   const [startDate, setStartDate] = useState('');
@@ -100,9 +104,46 @@ const FinanceReports = () => {
     setToastMessage('Ledger exported to CSV successfully!');
   };
 
-  // Print function
-  const triggerPrint = () => {
-    window.print();
+  // Generate Beautiful PDF
+  const downloadPDF = async () => {
+    if (!reportRef.current) return;
+    setGeneratingPDF(true);
+    setToastType('success');
+    setToastMessage('Generating high-quality PDF report...');
+    
+    try {
+      const element = reportRef.current;
+      // Force element to be fully visible for canvas
+      const originalStyle = element.style.cssText;
+      element.style.padding = '40px';
+      element.style.background = '#ffffff';
+      element.style.color = '#000000';
+      
+      const canvas = await html2canvas(element, { 
+        scale: 2, 
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      element.style.cssText = originalStyle;
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`ShaadMates_FinanceReport_${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      setToastMessage('PDF downloaded successfully!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setToastType('error');
+      setToastMessage('Failed to generate PDF.');
+    } finally {
+      setGeneratingPDF(false);
+    }
   };
 
   if (loading) {
@@ -117,7 +158,7 @@ const FinanceReports = () => {
   return (
     <div className="p-6 space-y-8 animate-scale">
       {/* Header Banner */}
-      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
+      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
           <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight font-sans">
             Financial Statements & Audits
@@ -136,17 +177,22 @@ const FinanceReports = () => {
             <span>Export CSV Sheet</span>
           </button>
           <button
-            onClick={triggerPrint}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-2xl bg-royal hover:bg-royal-dark text-white text-xs font-bold transition-all shadow-md"
+            onClick={downloadPDF}
+            disabled={generatingPDF}
+            className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl ${generatingPDF ? 'bg-royal/50 cursor-not-allowed' : 'bg-royal hover:bg-royal-dark'} text-white text-xs font-bold transition-all shadow-md`}
           >
-            <Printer size={16} />
-            <span>Print / Save PDF</span>
+            {generatingPDF ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Printer size={16} />
+            )}
+            <span>{generatingPDF ? 'Generating PDF...' : 'Download PDF Report'}</span>
           </button>
         </div>
       </div>
 
-      {/* Date Interval filter - hidden in print */}
-      <div className="p-6 rounded-3xl glass-card border shadow-lg space-y-4 print:hidden">
+      {/* Date Interval filter */}
+      <div className="p-6 rounded-3xl glass-card border shadow-lg space-y-4">
         <h3 className="text-sm font-bold font-sans flex items-center space-x-2 text-slate-800 dark:text-white">
           <Calendar size={16} className="text-royal" />
           <span>Select Statements Date Interval</span>
@@ -181,13 +227,16 @@ const FinanceReports = () => {
         </div>
       </div>
 
-      {/* Branded Statement Sheet - optimized for screen + print layout */}
-      <div className="p-8 rounded-3xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 shadow-xl space-y-8 print:border-none print:shadow-none print:p-0">
+      {/* Branded Statement Sheet - Ref added for PDF generation */}
+      <div 
+        ref={reportRef} 
+        className="p-8 rounded-3xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 shadow-xl space-y-8 text-black dark:text-white"
+      >
         
-        {/* Print Only Header */}
-        <div className="hidden print:flex justify-between items-center border-b pb-6">
+        {/* PDF Document Header */}
+        <div className="flex justify-between items-center border-b pb-6 border-slate-200 dark:border-slate-800">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">🎓 Shaad-Mates WebSuite ERP</h1>
+            <h1 className="text-2xl font-bold tracking-tight">🎓 Shaad-Mates Website ERP</h1>
             <p className="text-xs text-slate-500 mt-1">Official Financial Ledger Statement</p>
           </div>
           <div className="text-right text-xs text-slate-500">
@@ -199,13 +248,13 @@ const FinanceReports = () => {
         {/* Statement Metadata */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 dark:border-slate-800 pb-4 gap-2">
           <div>
-            <h3 className="text-lg font-bold text-slate-800 dark:text-white">Summary Account Balance</h3>
-            <p className="text-xs text-slate-450 mt-1">
+            <h3 className="text-lg font-bold">Summary Account Balance</h3>
+            <p className="text-xs text-slate-500 mt-1">
               Statement Period: {startDate ? new Date(startDate).toLocaleDateString() : 'Inception'} to {endDate ? new Date(endDate).toLocaleDateString() : 'Present'}
             </p>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-royal/10 text-royal rounded border border-royal/20">
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-blue-100 text-blue-800 rounded border border-blue-200">
               Active ledger account
             </span>
           </div>
@@ -213,21 +262,21 @@ const FinanceReports = () => {
 
         {/* Aggregate Totals */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80">
-            <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mb-1">Gross Period Incomes</span>
-            <div className="text-xl font-bold text-emerald-500 font-mono">
+          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Gross Period Incomes</span>
+            <div className="text-xl font-bold text-emerald-600 font-mono">
               +${incomeTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
-          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80">
-            <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mb-1">Gross Period Expenses</span>
-            <div className="text-xl font-bold text-rose-500 font-mono">
+          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Gross Period Expenses</span>
+            <div className="text-xl font-bold text-red-600 font-mono">
               -${expenseTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
-          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80">
-            <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mb-1">Net Balance</span>
-            <div className={`text-xl font-bold font-mono ${netBalance >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Net Balance</span>
+            <div className={`text-xl font-bold font-mono ${netBalance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
               {netBalance >= 0 ? '+' : '-'}${Math.abs(netBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
@@ -235,32 +284,32 @@ const FinanceReports = () => {
 
         {/* Category Breakdown Table */}
         <div className="space-y-4">
-          <h4 className="text-sm font-bold text-slate-800 dark:text-white flex items-center space-x-2">
-            <BarChart2 size={16} className="text-cyan" />
+          <h4 className="text-sm font-bold flex items-center space-x-2">
+            <BarChart2 size={16} className="text-blue-600" />
             <span>Aggregate breakdown by Category</span>
           </h4>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-450 font-bold bg-slate-100 dark:bg-slate-900/60">
+                <tr className="border-b border-slate-300 dark:border-slate-700 text-slate-600 font-bold bg-slate-100 dark:bg-slate-800">
                   <th className="p-3">Category Name</th>
                   <th className="p-3 text-right">Incomes Aggregate</th>
                   <th className="p-3 text-right">Expenses Aggregate</th>
                   <th className="p-3 text-right">Net Impact</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {Object.keys(categoryBreakdown).length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="p-4 text-center text-slate-400 italic">No ledger activity in selected interval.</td>
+                    <td colSpan="4" className="p-4 text-center text-slate-500 italic">No ledger activity in selected interval.</td>
                   </tr>
                 ) : (
                   Object.entries(categoryBreakdown).map(([cat, val]) => (
-                    <tr key={cat} className="hover:bg-slate-500/5">
-                      <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">{cat}</td>
-                      <td className="p-3 text-right font-mono text-emerald-500">+${val.income.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                      <td className="p-3 text-right font-mono text-rose-500">-${val.expense.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                      <td className={`p-3 text-right font-mono font-bold ${(val.income - val.expense) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    <tr key={cat} className="hover:bg-slate-50 dark:hover:bg-slate-900">
+                      <td className="p-3 font-semibold">{cat}</td>
+                      <td className="p-3 text-right font-mono text-emerald-600">+${val.income.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                      <td className="p-3 text-right font-mono text-red-600">-${val.expense.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                      <td className={`p-3 text-right font-mono font-bold ${(val.income - val.expense) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                         ${(val.income - val.expense).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
                     </tr>
@@ -272,14 +321,14 @@ const FinanceReports = () => {
         </div>
 
         {/* Ledger logs breakdown */}
-        <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-850">
-          <h4 className="text-sm font-bold text-slate-800 dark:text-white flex items-center space-x-2">
+        <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h4 className="text-sm font-bold flex items-center space-x-2">
             <span>Detailed Ledger Postings</span>
           </h4>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-450 font-bold bg-slate-100 dark:bg-slate-900/60">
+                <tr className="border-b border-slate-300 dark:border-slate-700 text-slate-600 font-bold bg-slate-100 dark:bg-slate-800">
                   <th className="p-3">Posting Reference</th>
                   <th className="p-3">Type</th>
                   <th className="p-3">Program</th>
@@ -287,28 +336,28 @@ const FinanceReports = () => {
                   <th className="p-3 text-right">Ledger Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {filteredTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="p-4 text-center text-slate-400 italic">No ledger activity in selected interval.</td>
+                    <td colSpan="5" className="p-4 text-center text-slate-500 italic">No ledger activity in selected interval.</td>
                   </tr>
                 ) : (
                   filteredTransactions.map((t) => (
-                    <tr key={t._id} className="hover:bg-slate-500/5">
+                    <tr key={t._id} className="hover:bg-slate-50 dark:hover:bg-slate-900">
                       <td className="p-3">
-                        <div className="font-semibold text-slate-800 dark:text-slate-200">{t.category}</div>
-                        <div className="text-[10px] text-slate-450 truncate max-w-xs">{t.description || 'No memo text'}</div>
+                        <div className="font-semibold">{t.category}</div>
+                        <div className="text-[10px] text-slate-500 truncate max-w-xs">{t.description || 'No memo text'}</div>
                       </td>
                       <td className="p-3 font-semibold uppercase font-mono text-[10px]">
                         {t.type}
                       </td>
-                      <td className="p-3 text-slate-500">
-                        {t.programId?.title || <span className="text-slate-400 italic">General Fund</span>}
+                      <td className="p-3 text-slate-600">
+                        {t.programId?.title || <span className="italic">General Fund</span>}
                       </td>
-                      <td className="p-3 text-slate-400 font-mono">
+                      <td className="p-3 text-slate-500 font-mono">
                         {new Date(t.date).toLocaleDateString()}
                       </td>
-                      <td className={`p-3 text-right font-mono font-bold ${t.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      <td className={`p-3 text-right font-mono font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-red-600'}`}>
                         {t.type === 'income' ? '+' : '-'}${t.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
                     </tr>

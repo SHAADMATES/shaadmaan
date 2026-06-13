@@ -1,14 +1,6 @@
 import express from 'express';
 import { protect, authorize } from '../middleware/auth.js';
-import Student from '../models/Student.js';
-import Program from '../models/Program.js';
-import Registration from '../models/Registration.js';
-import Group from '../models/Group.js';
-import Schedule from '../models/Schedule.js';
-import Result from '../models/Result.js';
-import Certificate from '../models/Certificate.js';
-import Library from '../models/Library.js';
-import Publication from '../models/Publication.js';
+import prisma from '../db.js';
 
 const router = express.Router();
 
@@ -18,7 +10,7 @@ router.use(protect, authorize('student'));
 // @desc    Get approved programs
 router.get('/programs', async (req, res) => {
   try {
-    const programs = await Program.find({ approved: true });
+    const programs = await prisma.program.findMany({ where: { approved: true } });
     res.json(programs);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving programs.' });
@@ -32,16 +24,19 @@ router.get('/search', async (req, res) => {
   if (!query) return res.json([]);
 
   try {
-    const currentStudent = await Student.findOne({ userId: req.user._id });
+    const currentStudent = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!currentStudent) return res.status(404).json({ message: 'Student profile not found.' });
 
-    const matches = await Student.find({
-      _id: { $ne: currentStudent._id },
-      $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { studentId: { $regex: query, $options: 'i' } }
-      ]
-    }).limit(10);
+    const matches = await prisma.student.findMany({
+      where: {
+        id: { not: currentStudent.id },
+        OR: [
+          { name: { contains: query } },
+          { studentId: { contains: query } }
+        ]
+      },
+      take: 10
+    });
 
     res.json(matches);
   } catch (error) {
@@ -55,54 +50,66 @@ router.post('/registrations', async (req, res) => {
   const { programId, type, teamName, memberIds } = req.body;
 
   try {
-    const student = await Student.findOne({ userId: req.user._id });
+    const student = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!student) return res.status(404).json({ message: 'Student profile not found.' });
 
-    const program = await Program.findById(programId);
+    const program = await prisma.program.findUnique({ where: { id: programId } });
     if (!program || !program.approved) return res.status(400).json({ message: 'Program unavailable.' });
 
     // Validate if deadline passed
-    if (program.registrationDeadline && new Date() > new Date(program.registrationDeadline)) {
+    if (program.date && new Date() > new Date(program.date)) {
       return res.status(400).json({ message: 'Registration deadline has passed.' });
     }
 
-    const existingRegs = await Registration.find({ programId }).populate('groupId');
+    const existingRegs = await prisma.registration.findMany({
+      where: { programId },
+      include: { group: { include: { members: true } } }
+    });
+    
     const isAlreadySignedUp = (sId) => {
       return existingRegs.some(r => {
-        if (r.studentId.toString() === sId.toString()) return true;
-        if (r.groupId && r.groupId.members.some(m => m.toString() === sId.toString())) return true;
+        if (r.studentId === sId) return true;
+        if (r.group && r.group.members.some(m => m.id === sId)) return true;
         return false;
       });
     };
 
-    if (isAlreadySignedUp(student._id)) {
+    if (isAlreadySignedUp(student.id)) {
       return res.status(400).json({ message: 'You are already registered.' });
     }
 
     if (type === 'single') {
-      const reg = await Registration.create({ programId, studentId: student._id, type: 'single' });
+      const reg = await prisma.registration.create({
+        data: { programId, studentId: student.id, type: 'single' }
+      });
       return res.status(201).json(reg);
     } else if (type === 'group') {
       if (!teamName) return res.status(400).json({ message: 'Team Name is required.' });
 
       for (let mId of memberIds) {
         if (isAlreadySignedUp(mId)) {
-          const mDoc = await Student.findById(mId);
+          const mDoc = await prisma.student.findUnique({ where: { id: mId } });
           return res.status(400).json({ message: `${mDoc?.name || 'Invitee'} is already registered.` });
         }
       }
 
-      const group = await Group.create({
-        name: teamName,
-        leaderId: student._id,
-        members: [student._id, ...memberIds]
+      const group = await prisma.group.create({
+        data: {
+          name: teamName,
+          leaderId: student.id,
+          members: {
+            connect: [student.id, ...memberIds].map(id => ({ id }))
+          }
+        }
       });
 
-      const reg = await Registration.create({
-        programId,
-        studentId: student._id,
-        type: 'group',
-        groupId: group._id
+      const reg = await prisma.registration.create({
+        data: {
+          programId,
+          studentId: student.id,
+          type: 'group',
+          groupId: group.id
+        }
       });
 
       return res.status(201).json(reg);
@@ -116,26 +123,40 @@ router.post('/registrations', async (req, res) => {
 // @desc    Get current student registrations
 router.get('/registrations/my', async (req, res) => {
   try {
-    const student = await Student.findOne({ userId: req.user._id });
+    const student = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!student) return res.status(404).json({ message: 'Student profile not found.' });
 
-    const myGroups = await Group.find({ members: student._id });
-    const myGroupIds = myGroups.map(g => g._id);
+    const myGroups = await prisma.group.findMany({
+      where: {
+        members: {
+          some: { id: student.id }
+        }
+      }
+    });
+    const myGroupIds = myGroups.map(g => g.id);
 
-    const regs = await Registration.find({
-      $or: [
-        { studentId: student._id },
-        { groupId: { $in: myGroupIds } }
-      ]
-    })
-      .populate('programId')
-      .populate('studentId')
-      .populate({
-        path: 'groupId',
-        populate: { path: 'members' }
-      });
+    const regs = await prisma.registration.findMany({
+      where: {
+        OR: [
+          { studentId: student.id },
+          { groupId: { in: myGroupIds } }
+        ]
+      },
+      include: {
+        program: true,
+        student: true,
+        group: { include: { members: true } }
+      }
+    });
+    
+    const mappedRegs = regs.map(r => ({
+      ...r,
+      programId: r.program,
+      studentId: r.student,
+      groupId: r.group
+    }));
 
-    res.json(regs);
+    res.json(mappedRegs);
   } catch (error) {
     res.status(500).json({ message: 'Retrieval failed.' });
   }
@@ -145,8 +166,18 @@ router.get('/registrations/my', async (req, res) => {
 // @desc    Get program schedules
 router.get('/schedules', async (req, res) => {
   try {
-    const schedules = await Schedule.find().populate('programId', 'title wing');
-    res.json(schedules);
+    const schedules = await prisma.schedule.findMany({
+      include: {
+        program: { select: { title: true, wing: true } }
+      }
+    });
+    
+    const mappedSchedules = schedules.map(s => ({
+      ...s,
+      programId: s.program
+    }));
+    
+    res.json(mappedSchedules);
   } catch (error) {
     res.status(500).json({ message: 'Schedules load failed.' });
   }
@@ -156,29 +187,39 @@ router.get('/schedules', async (req, res) => {
 // @desc    Get scorecard achievements
 router.get('/results/my', async (req, res) => {
   try {
-    const student = await Student.findOne({ userId: req.user._id });
+    const student = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!student) return res.status(404).json({ message: 'Student profile not found.' });
 
-    const allResults = await Result.find().populate('programId');
+    const allResults = await prisma.result.findMany({
+      include: {
+        program: true,
+        winners: {
+          include: {
+            group: {
+              include: { members: true }
+            }
+          }
+        }
+      }
+    });
     const scorecard = [];
 
     for (let r of allResults) {
       for (let w of r.winners) {
         let isWinnerMatch = false;
 
-        if (r.type === 'single' && w.studentId && w.studentId.toString() === student._id.toString()) {
+        if (r.type === 'single' && w.studentId === student.id) {
           isWinnerMatch = true;
-        } else if (r.type === 'group' && w.groupId) {
-          const group = await Group.findById(w.groupId);
-          if (group && group.members.some(m => m.toString() === student._id.toString())) {
+        } else if (r.type === 'group' && w.group) {
+          if (w.group.members.some(m => m.id === student.id)) {
             isWinnerMatch = true;
           }
         }
 
         if (isWinnerMatch) {
           scorecard.push({
-            _id: `${r._id}-${w._id}`,
-            program: { title: r.programId?.title || 'Unknown Event' },
+            _id: `${r.id}-${w.id}`,
+            program: { title: r.program?.title || 'Unknown Event' },
             type: r.type,
             position: w.position,
             marks: w.marks,
@@ -200,18 +241,26 @@ router.get('/results/my', async (req, res) => {
 // @desc    Get certificates earned by student
 router.get('/certificates', async (req, res) => {
   try {
-    const student = await Student.findOne({ userId: req.user._id });
+    const student = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!student) return res.status(404).json({ message: 'Student profile not found.' });
 
-    const certs = await Certificate.find({ studentId: student._id, approved: true })
-      .populate('programId', 'title wing date venue');
-    res.json(certs);
+    const certs = await prisma.certificate.findMany({
+      where: { studentId: student.id, approved: true },
+      include: {
+        program: { select: { title: true, wing: true, date: true, venue: true } }
+      }
+    });
+    
+    const mappedCerts = certs.map(c => ({
+      ...c,
+      programId: c.program
+    }));
+    
+    res.json(mappedCerts);
   } catch (error) {
     res.status(500).json({ message: 'Error loading certificates.' });
   }
 });
-
-
 
 // @route   POST /api/student/publications
 // @desc    Submit article / news / publication proposal
@@ -223,17 +272,19 @@ router.post('/publications', async (req, res) => {
   }
 
   try {
-    const student = await Student.findOne({ userId: req.user._id });
+    const student = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!student) return res.status(404).json({ message: 'Student profile not found.' });
 
-    const publication = await Publication.create({
-      title,
-      content,
-      language,
-      category,
-      studentId: student._id,
-      fileUrl: fileUrl || '',
-      status: 'Pending'
+    const publication = await prisma.publication.create({
+      data: {
+        title,
+        content,
+        language,
+        category,
+        studentId: student.id,
+        fileUrl: fileUrl || '',
+        status: 'Pending'
+      }
     });
 
     res.status(201).json(publication);
@@ -246,10 +297,10 @@ router.post('/publications', async (req, res) => {
 // @desc    Get student's own submissions
 router.get('/publications/my', async (req, res) => {
   try {
-    const student = await Student.findOne({ userId: req.user._id });
+    const student = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!student) return res.status(404).json({ message: 'Student profile not found.' });
 
-    const pubs = await Publication.find({ studentId: student._id });
+    const pubs = await prisma.publication.findMany({ where: { studentId: student.id } });
     res.json(pubs);
   } catch (error) {
     res.status(500).json({ message: 'Failed to load publications.' });
@@ -261,13 +312,17 @@ router.get('/publications/my', async (req, res) => {
 router.put('/profile', async (req, res) => {
   const { phone, email } = req.body;
   try {
-    const student = await Student.findOne({ userId: req.user._id });
+    const student = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!student) return res.status(404).json({ message: 'Student profile not found.' });
 
-    student.phone = phone !== undefined ? phone : student.phone;
-    student.email = email !== undefined ? email : student.email;
-    await student.save();
-    res.json(student);
+    const updatedStudent = await prisma.student.update({
+      where: { id: student.id },
+      data: {
+        phone: phone !== undefined ? phone : student.phone,
+        email: email !== undefined ? email : student.email
+      }
+    });
+    res.json(updatedStudent);
   } catch (error) {
     res.status(500).json({ message: 'Update failed.' });
   }

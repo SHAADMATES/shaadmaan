@@ -37,7 +37,7 @@ const Library = () => {
     setToastMessage(`Downloading "${book.title}" catalog document...`);
     
     // Simulate catalog file downloading by creating a dummy text file
-    const docData = `Title: ${book.title}\nAuthor: ${book.author}\nCategory: ${book.category}\nDescription: ${book.description}\n\nThis is a mock digital library file download from Shaad-Mates WebSuite ERP.`;
+    const docData = `Title: ${book.title}\nAuthor: ${book.author}\nCategory: ${book.category}\nDescription: ${book.description}\n\nThis is a mock digital library file download from Shaad-Mates Website ERP.`;
     const blob = new Blob([docData], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     
