@@ -137,6 +137,9 @@ const ManageStudents = () => {
   const [name, setName] = useState('');
   const [admissionNumber, setAdmissionNumber] = useState('');
   const [wing, setWing] = useState('');
+  const [className, setClassName] = useState('');
+  const [dob, setDob] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [photo, setPhoto] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -183,7 +186,7 @@ const ManageStudents = () => {
 
   const resetForm = () => {
     setUsername(''); setPassword(''); setName('');
-    setAdmissionNumber(''); setWing(''); setEmail('');
+    setAdmissionNumber(''); setWing(''); setClassName(''); setDob(''); setPhone(''); setEmail('');
     setPhoto(''); setCustomValues({}); setErrorMsg('');
   };
 
@@ -221,6 +224,9 @@ const ManageStudents = () => {
     setName(student.name);
     setAdmissionNumber(student.admissionNumber);
     setWing(student.wing || '');
+    setClassName(student.className || '');
+    setDob(student.dob ? new Date(student.dob).toISOString().split('T')[0] : '');
+    setPhone(student.phone || '');
     setEmail(student.email || '');
     setPhoto(student.photo || '');
     setCustomValues(student.customValues || {});
@@ -234,7 +240,7 @@ const ManageStudents = () => {
       setErrorMsg('Name, Admission Number, Username, and Password are required.');
       return;
     }
-    const payload = { username, password, name, admissionNumber, wing, email, photo, customValues };
+    const payload = { username, password, name, admissionNumber, class: className, wing, dob, phone, email, photo, customValues };
     try {
       if (editMode) {
         await api.put(`/admin/students/${selectedStudent._id}`, payload);
@@ -514,10 +520,45 @@ const ManageStudents = () => {
                     placeholder="e.g. Red Wing"
                     list="wings-datalist"
                   />
-                  <datalist id="wings-datalist">
-                    {wingsList.map(w => <option key={w} value={w} />)}
-                  </datalist>
-                </div>
+                    <datalist id="wings-datalist">
+                      {wingsList.map(w => <option key={w} value={w} />)}
+                    </datalist>
+                  </div>
+
+                  {/* Class */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                      <GraduationCap size={11} className="text-royal" /><span>Class</span>
+                    </label>
+                    <input
+                      type="text" value={className} onChange={(e) => setClassName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                      placeholder="e.g. Class XII"
+                    />
+                  </div>
+
+                  {/* Date of Birth */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                      <span>Date of Birth</span>
+                    </label>
+                    <input
+                      type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                      className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                      <span>Phone Number</span>
+                    </label>
+                    <input
+                      type="text" value={phone} onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                      placeholder="e.g. 1234567890"
+                    />
+                  </div>
 
                 {/* Student Photo Upload */}
                 <div className="space-y-2 sm:col-span-2">

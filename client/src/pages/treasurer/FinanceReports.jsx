@@ -4,6 +4,7 @@ import { FileSpreadsheet, Printer, Calendar, DollarSign, ArrowUpRight, ArrowDown
 import Toast from '../../components/Toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const FinanceReports = () => {
   const [transactions, setTransactions] = useState([]);
@@ -105,37 +106,127 @@ const FinanceReports = () => {
   };
 
   // Generate Beautiful PDF
-  const downloadPDF = async () => {
-    if (!reportRef.current) return;
+  const downloadPDF = () => {
     setGeneratingPDF(true);
     setToastType('success');
     setToastMessage('Generating high-quality PDF report...');
-    
-    try {
-      const element = reportRef.current;
-      // Force element to be fully visible for canvas
-      const originalStyle = element.style.cssText;
-      element.style.padding = '40px';
-      element.style.background = '#ffffff';
-      element.style.color = '#000000';
-      
-      const canvas = await html2canvas(element, { 
-        scale: 2, 
-        useCORS: true,
-        backgroundColor: '#ffffff'
-      });
-      
-      element.style.cssText = originalStyle;
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+    try {
+      const doc = new jsPDF('p', 'pt', 'a4');
+
+      // Title
+      doc.setFontSize(20);
+      doc.setTextColor(40);
+      doc.text('Shaad-Mates Website ERP', 40, 40);
       
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text('Official Financial Ledger Statement', 40, 55);
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`ShaadMates_FinanceReport_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, doc.internal.pageSize.getWidth() - 40, 40, { align: 'right' });
+      doc.text('Auditor Console: Treasurer Desk', doc.internal.pageSize.getWidth() - 40, 55, { align: 'right' });
+
+      // Summary
+      doc.setFontSize(14);
+      doc.setTextColor(40);
+      doc.text('Summary Account Balance', 40, 85);
       
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Statement Period: ${startDate ? new Date(startDate).toLocaleDateString() : 'Inception'} to ${endDate ? new Date(endDate).toLocaleDateString() : 'Present'}`, 40, 100);
+
+      // Totals
+      doc.setFontSize(12);
+      doc.setTextColor(40);
+      doc.text(`Gross Incomes: +$${incomeTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 40, 125);
+      doc.text(`Gross Expenses: -$${expenseTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 240, 125);
+      
+      if (netBalance >= 0) {
+        doc.setTextColor(0, 150, 0);
+        doc.text(`Net Balance: +$${Math.abs(netBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 440, 125);
+      } else {
+        doc.setTextColor(200, 0, 0);
+        doc.text(`Net Balance: -$${Math.abs(netBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 440, 125);
+      }
+
+      // Category Breakdown Table
+      doc.setFontSize(12);
+      doc.setTextColor(40);
+      doc.text('Aggregate breakdown by Category', 40, 160);
+
+      const categoryRows = Object.entries(categoryBreakdown).map(([cat, val]) => [
+        cat,
+        `+$${val.income.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        `-$${val.expense.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        `${val.income - val.expense >= 0 ? '+' : '-'}$${Math.abs(val.income - val.expense).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+      ]);
+
+      let finalY = 175;
+
+      if (categoryRows.length > 0) {
+        doc.autoTable({
+          startY: finalY,
+          head: [['Category Name', 'Incomes Aggregate', 'Expenses Aggregate', 'Net Impact']],
+          body: categoryRows,
+          theme: 'striped',
+          headStyles: { fillColor: [41, 128, 185] },
+          margin: { left: 40, right: 40 },
+          didParseCell: function(data) {
+            if (data.section === 'body' && data.column.index === 3) {
+              const valStr = data.cell.raw;
+              if (valStr.startsWith('+')) {
+                data.cell.styles.textColor = [0, 150, 0];
+              } else if (valStr.startsWith('-')) {
+                data.cell.styles.textColor = [200, 0, 0];
+              }
+            }
+          }
+        });
+        finalY = doc.lastAutoTable.finalY + 30;
+      } else {
+        doc.setFontSize(10);
+        doc.text('No ledger activity in selected interval.', 40, finalY);
+        finalY += 30;
+      }
+
+      // Ledger Postings
+      doc.setFontSize(12);
+      doc.setTextColor(40);
+      doc.text('Detailed Ledger Postings', 40, finalY);
+
+      const ledgerRows = filteredTransactions.map(t => [
+        t.category,
+        t.type.toUpperCase(),
+        t.programId?.title || 'General Fund',
+        new Date(t.date).toLocaleDateString(),
+        `${t.type === 'income' ? '+' : '-'}$${t.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+      ]);
+
+      if (ledgerRows.length > 0) {
+        doc.autoTable({
+          startY: finalY + 15,
+          head: [['Posting Reference', 'Type', 'Program', 'Posting Date', 'Ledger Amount']],
+          body: ledgerRows,
+          theme: 'grid',
+          headStyles: { fillColor: [52, 73, 94] },
+          margin: { left: 40, right: 40 },
+          didParseCell: function(data) {
+            if (data.section === 'body' && data.column.index === 4) {
+              const valStr = data.cell.raw;
+              if (valStr.startsWith('+')) {
+                data.cell.styles.textColor = [0, 150, 0];
+              } else if (valStr.startsWith('-')) {
+                data.cell.styles.textColor = [200, 0, 0];
+              }
+            }
+          }
+        });
+      } else {
+        doc.setFontSize(10);
+        doc.text('No ledger activity in selected interval.', 40, finalY + 15);
+      }
+
+      doc.save(`ShaadMates_FinanceReport_${new Date().toISOString().split('T')[0]}.pdf`);
       setToastMessage('PDF downloaded successfully!');
     } catch (error) {
       console.error('Error generating PDF:', error);

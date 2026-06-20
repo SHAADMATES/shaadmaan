@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const systemSettingSchema = new mongoose.Schema({
   orgName: {
     type: String,
-    default: 'Shaad-Mates WebSuite'
+    default: 'Shaad-Mates Website'
   },
   orgLogo: {
     type: String,

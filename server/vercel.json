@@ -5,7 +5,7 @@
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["uploads/**", "models/**", "routes/**", "middleware/**", "config/**"]
+        "includeFiles": ["uploads/**", "models/**", "routes/**", "middleware/**", "config/**", "prisma/**"]
       }
     }
   ],

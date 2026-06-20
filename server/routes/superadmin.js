@@ -27,17 +27,17 @@ router.get('/users', async (req, res) => {
         role: true,
         isActive: true,
         createdAt: true,
-        studentProfile: true,
-        wingChairmanProfile: true
+        student: true,
+        wingChairman: true
       }
     });
 
     const enrichedUsers = users.map(u => {
       let profile = null;
-      if (u.role === 'student') profile = u.studentProfile;
-      else if (u.role === 'wing_chairman') profile = u.wingChairmanProfile;
+      if (u.role === 'student') profile = u.student;
+      else if (u.role === 'wing_chairman') profile = u.wingChairman;
       
-      const { studentProfile, wingChairmanProfile, ...rest } = u;
+      const { student, wingChairman, ...rest } = u;
       return {
         ...rest,
         profile
@@ -105,7 +105,7 @@ router.post('/users', async (req, res) => {
           name,
           studentId,
           admissionNumber,
-          class: className,
+          className: className,
           wing,
           dob: new Date(dob),
           phone: phone || '',
