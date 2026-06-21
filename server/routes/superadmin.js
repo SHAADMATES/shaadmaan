@@ -11,9 +11,13 @@ const router = express.Router();
 router.use(protect, authorize('super_admin'));
 
 // Helper for backup directory
-const backupDir = './backups';
-if (!fs.existsSync(backupDir)) {
-  fs.mkdirSync(backupDir);
+const backupDir = process.env.NODE_ENV === 'production' ? '/tmp/backups' : './backups';
+try {
+  if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir, { recursive: true });
+  }
+} catch (error) {
+  console.warn('Could not create backup directory, continuing anyway:', error.message);
 }
 
 // @route   GET /api/superadmin/users
