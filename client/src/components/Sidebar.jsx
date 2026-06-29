@@ -43,7 +43,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: '/admin/wings', label: 'Manage Wings', icon: UserSquare2 },
     { to: '/admin/users', label: 'User Directory', icon: UserCircle },
     { to: '/admin/forms', label: 'Forms Management', icon: FileSpreadsheet },
-    { to: '/admin/publications', label: 'Moderate Articles', icon: BookMarked },
+    { to: '/admin/outreach', label: 'Outreach', icon: BookMarked },
     { to: '/admin/programs', label: 'Manage Programs', icon: FolderKanban },
     { to: '/admin/schedule', label: 'Program Schedule', icon: Calendar },
     { to: '/admin/results', label: 'Add Results', icon: Trophy },
@@ -74,7 +74,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: '/student/schedule', label: 'Timeline Schedule', icon: Calendar },
     { to: '/student/my-results', label: 'My Results', icon: Trophy },
     { to: '/student/certificates', label: 'My Certificates', icon: Award },
-    { to: '/student/publications', label: 'My Publications', icon: BookMarked },
+
     { to: '/student/profile', label: 'Profile Settings', icon: UserCircle },
   ];
 

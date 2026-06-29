@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../context/AuthContext';
 import { Search, Award, CheckCircle, XCircle, ShieldAlert, Sparkles, Printer } from 'lucide-react';
 import Toast from '../components/Toast';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const VerifyCertificate = () => {
   const [certId, setCertId] = useState('');
@@ -51,8 +53,27 @@ const VerifyCertificate = () => {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    const element = document.getElementById('certificate-print-area');
+    if (!element) return;
+
+    setToastType('info');
+    setToastMessage('Rendering high-quality PDF...');
+
+    try {
+      const canvas = await html2canvas(element, { scale: 2.5, useCORS: true, backgroundColor: '#ffffff', logging: false });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`certificate-${certData.certificateId}.pdf`);
+
+      setToastType('success');
+      setToastMessage('Certificate downloaded as PDF successfully!');
+    } catch (error) {
+      console.error(error);
+      setToastType('error');
+      setToastMessage('Failed to generate PDF.');
+    }
   };
 
   return (
@@ -112,7 +133,7 @@ const VerifyCertificate = () => {
 
         {/* Certificate Display Card */}
         {certData && (
-          <div className="w-full max-w-2xl glass-card border rounded-3xl p-8 shadow-2xl relative overflow-hidden flex flex-col items-center space-y-6 border-gold/30 glow-gold animate-scale">
+          <div id="certificate-print-area" className="w-full max-w-2xl glass-card border rounded-3xl p-8 shadow-2xl relative overflow-hidden flex flex-col items-center space-y-6 border-gold/30 glow-gold animate-scale">
             {/* Stamp / Decorative Borders */}
             <div className="absolute top-0 right-0 w-24 h-24 bg-gold/10 rounded-full blur-xl pointer-events-none"></div>
             

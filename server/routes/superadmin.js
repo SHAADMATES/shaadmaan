@@ -345,4 +345,70 @@ router.put('/users/:id/toggle-status', async (req, res) => {
   }
 });
 
+// @route   POST /api/superadmin/bulk-upload/students
+// @desc    Bulk upload students
+router.post('/bulk-upload/students', async (req, res) => {
+  const { students } = req.body; // Array of student objects
+
+  if (!students || !Array.isArray(students)) {
+    return res.status(400).json({ message: 'Invalid data format. Expected an array of students.' });
+  }
+
+  try {
+    let addedCount = 0;
+    let failedCount = 0;
+
+    for (const data of students) {
+      try {
+        const { username, password, name, studentId, admissionNumber, className, wing, dob, phone, email } = data;
+        
+        const userExists = await prisma.user.findUnique({ where: { username } });
+        if (userExists) { failedCount++; continue; }
+
+        const hashedPassword = await bcrypt.hash(password || 'password123', 10);
+        
+        const user = await prisma.user.create({
+          data: {
+            username,
+            password: hashedPassword,
+            role: 'student',
+            plainPassword: password || 'password123'
+          }
+        });
+
+        await prisma.student.create({
+          data: {
+            userId: user.id,
+            name,
+            studentId,
+            admissionNumber,
+            className: className || 'Class XII',
+            wing: wing || '',
+            dob: dob ? new Date(dob) : new Date(),
+            phone: phone || '',
+            email: email || ''
+          }
+        });
+        
+        addedCount++;
+      } catch (err) {
+        failedCount++;
+      }
+    }
+
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user.id,
+        username: req.user.username,
+        action: 'BULK_UPLOAD_STUDENTS',
+        details: `Bulk uploaded ${addedCount} students.`
+      }
+    });
+
+    res.json({ message: `Bulk upload complete. Added: ${addedCount}, Failed/Skipped: ${failedCount}` });
+  } catch (error) {
+    res.status(500).json({ message: 'Bulk upload failed.', error: error.message });
+  }
+});
+
 export default router;

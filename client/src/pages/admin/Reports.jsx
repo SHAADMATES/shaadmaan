@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
 import { FileSpreadsheet, Printer, Download, Filter, RefreshCw, AlertCircle } from 'lucide-react';
 import Toast from '../../components/Toast';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const Reports = () => {
   const [reportType, setReportType] = useState('programs');
@@ -176,9 +178,28 @@ const Reports = () => {
     logReportDownload(`Exported CSV for ${reportType}`);
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     logReportDownload(`Printed report sheet for ${reportType}`);
-    window.print();
+    const input = document.getElementById('report-pdf-area');
+    if (!input) return;
+    
+    setLoading(true);
+    try {
+      const canvas = await html2canvas(input, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`ShaadMates_${reportType}_Report.pdf`);
+    } catch (err) {
+      console.error(err);
+      setToastType('error');
+      setToastMessage('Failed to generate PDF');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const months = [
@@ -292,7 +313,7 @@ const Reports = () => {
       )}
 
       {/* Document View Wrapper (Print Friendly) */}
-      <div className="bg-white dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+      <div id="report-pdf-area" className="bg-white dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
         {/* Printable Header */}
         <div className="text-center border-b pb-6 border-slate-100 dark:border-slate-800/80">
           <h2 className="text-2xl font-extrabold font-sans">Shaad-Mates Program Management</h2>

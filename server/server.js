@@ -11,6 +11,7 @@ import treasurerRouter from './routes/treasurer.js';
 import studentRouter from './routes/student.js';
 import resultsRouter from './routes/results.js';
 import searchRouter from './routes/search.js';
+import outreachRouter from './routes/outreach.js';
 
 // Load env vars
 dotenv.config();
@@ -63,6 +64,7 @@ app.use('/api/treasurer', treasurerRouter);
 app.use('/api/student', studentRouter);
 app.use('/api/results', resultsRouter);
 app.use('/api/search', searchRouter);
+app.use('/api/outreach', outreachRouter);
 
 // Fallback Route
 app.use((req, res) => {

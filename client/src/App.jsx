@@ -16,6 +16,7 @@ import SuperDashboard from './pages/superadmin/Dashboard';
 import ManageUsers from './pages/superadmin/ManageUsers';
 import Backups from './pages/superadmin/Backups';
 import AuditLogs from './pages/superadmin/AuditLogs';
+import SuperBulkUpload from './pages/superadmin/BulkUpload';
 
 // Treasurer Pages
 import TreasurerDashboard from './pages/treasurer/Dashboard';
@@ -28,7 +29,7 @@ import ManageStudents from './pages/admin/ManageStudents';
 import Wings from './pages/admin/Wings';
 import AllUsers from './pages/admin/AllUsers';
 import FormsManagement from './pages/admin/FormsManagement';
-import ManagePublications from './pages/admin/ManagePublications';
+import ManageOutreach from './pages/admin/ManageOutreach';
 import ManagePrograms from './pages/admin/ManagePrograms';
 import AdminSchedule from './pages/admin/Schedule';
 import AddResults from './pages/admin/AddResults';
@@ -52,7 +53,6 @@ import StudentSchedule from './pages/student/Schedule';
 import StudentResults from './pages/student/MyResults';
 import StudentProfile from './pages/student/Profile';
 import StudentCertificates from './pages/student/Certificates';
-import StudentPublications from './pages/student/Publications';
 
 function App() {
   return (
@@ -72,6 +72,7 @@ function App() {
               <Route path="/super/users" element={<ManageUsers />} />
               <Route path="/super/backups" element={<Backups />} />
               <Route path="/super/audit-logs" element={<AuditLogs />} />
+              <Route path="/super/bulk-upload" element={<SuperBulkUpload />} />
             </Route>
           </Route>
 
@@ -92,7 +93,7 @@ function App() {
               <Route path="/admin/wings" element={<Wings />} />
               <Route path="/admin/users" element={<AllUsers />} />
               <Route path="/admin/forms" element={<FormsManagement />} />
-              <Route path="/admin/publications" element={<ManagePublications />} />
+              <Route path="/admin/outreach" element={<ManageOutreach />} />
               <Route path="/admin/programs" element={<ManagePrograms />} />
               <Route path="/admin/schedule" element={<AdminSchedule />} />
               <Route path="/admin/results" element={<AddResults />} />
@@ -126,7 +127,6 @@ function App() {
               <Route path="/student/schedule" element={<StudentSchedule />} />
               <Route path="/student/my-results" element={<StudentResults />} />
               <Route path="/student/certificates" element={<StudentCertificates />} />
-              <Route path="/student/publications" element={<StudentPublications />} />
               <Route path="/student/profile" element={<StudentProfile />} />
             </Route>
           </Route>

@@ -124,17 +124,15 @@ model Program {
   schedules     Schedule[]
 }
 
-model Publication {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  language  String
-  category  String
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  status    String   @default("Pending")
-  fileUrl   String   @default("")
-  createdAt DateTime @default(now())
+model Outreach {
+  id              String   @id @default(uuid())
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id])
+  programDate     DateTime
+  organization    String
+  type            String
+  position        String   @default("")
+  createdAt       DateTime @default(now())
 }
 
 model Registration {
@@ -211,7 +209,7 @@ model Student {
   certificates  Certificate[]
   ledGroups     Group[]        @relation("GroupLeader")
   memberGroups  Group[]        @relation("GroupMembers")
-  publications  Publication[]
+  outreaches    Outreach[]
   registrations Registration[]
   wonResults    Winner[]
 }

@@ -271,6 +271,7 @@ const SuperDashboard = () => {
                 { to: '/super/users', icon: Users, label: 'Manage Users', color: 'text-blue-500 bg-blue-500/10' },
                 { to: '/super/logs', icon: ShieldAlert, label: 'Audit Logs', color: 'text-red-500 bg-red-500/10' },
                 { to: '/super/backups', icon: Archive, label: 'Backups', color: 'text-emerald-500 bg-emerald-500/10' },
+                { onClick: () => window.location.href='/super/bulk-upload', icon: Users, label: 'Bulk Upload', color: 'text-cyan-500 bg-cyan-500/10' },
                 { onClick: () => showToast('System cache cleared!'), icon: RefreshCw, label: 'Flush Cache', color: 'text-purple-500 bg-purple-500/10' },
               ].map((action, i) =>
                 action.to ? (

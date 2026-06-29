@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../context/AuthContext';
 import { Plus, Edit2, Trash2, Search, X, AlertCircle, FileSpreadsheet, Printer, Shield, User, Key, Mail, Hash, Image, Download, Eye, EyeOff, ChevronDown, GraduationCap } from 'lucide-react';
 import Toast from '../../components/Toast';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 // Helper: color by wing name hash
 const wingColors = [
@@ -294,6 +296,26 @@ const ManageStudents = () => {
     setToastMessage('Exported students to CSV.');
   };
 
+  const handlePrint = async () => {
+    const input = document.getElementById('student-print-area');
+    if (!input) return;
+    setLoading(true);
+    try {
+      const canvas = await html2canvas(input, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('ShaadMates_Students.pdf');
+    } catch (err) {
+      setToastType('error');
+      setToastMessage('Failed to generate PDF');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredStudents = students.filter(student => {
     const query = searchQuery.toLowerCase();
     const matchesSearch =
@@ -325,7 +347,7 @@ const ManageStudents = () => {
             <button onClick={exportToCSV} className="flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl shadow transition-all">
               <Download size={13} /><span>Export CSV</span>
             </button>
-            <button onClick={() => window.print()} className="flex items-center space-x-1.5 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-2xl shadow transition-all">
+            <button onClick={handlePrint} className="flex items-center space-x-1.5 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-2xl shadow transition-all">
               <Printer size={13} /><span>Print</span>
             </button>
             <button onClick={handleOpenAdd} className="flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-royal to-cyan-500 text-white text-xs font-bold rounded-2xl shadow transition-all">
@@ -385,6 +407,7 @@ const ManageStudents = () => {
       </p>
 
       {/* Content */}
+      <div id="student-print-area" className="space-y-4">
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {[1,2,3,4,5,6,7,8].map(n => <div key={n} className="h-52 rounded-3xl animate-shimmer" />)}
@@ -457,6 +480,7 @@ const ManageStudents = () => {
           </div>
         </div>
       )}
+      </div>
 
       {/* Add / Edit Modal */}
       {isOpen && (
