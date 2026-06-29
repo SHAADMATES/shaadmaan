@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
-import { FileSpreadsheet, Printer, Download, Filter, RefreshCw, AlertCircle } from 'lucide-react';
+import { FileSpreadsheet, Printer, Download, Filter, RefreshCw, AlertCircle, Globe } from 'lucide-react';
 import Toast from '../../components/Toast';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 
 const Reports = () => {
   const [reportType, setReportType] = useState('programs');
@@ -35,15 +33,16 @@ const Reports = () => {
       } else if (reportType === 'results') {
         endpoint = '/admin/results';
       } else if (reportType === 'wing_wise') {
-        endpoint = '/admin/stats'; // stats contains wing breakdown
+        endpoint = '/admin/stats';
       } else if (reportType === 'student_wise') {
         endpoint = '/admin/students';
+      } else if (reportType === 'outreach') {
+        endpoint = '/admin/outreach/report';
       }
 
       const res = await api.get(endpoint);
       let fetchedData = res.data;
 
-      // Apply client-side filters based on Month/Year/Wing for programs, schedules, results
       if (reportType === 'programs') {
         fetchedData = fetchedData.filter(p => {
           const pDate = new Date(p.date);
@@ -70,7 +69,6 @@ const Reports = () => {
 
       setData(fetchedData);
       
-      // Seed wings selector lists on first programs load
       if (reportType === 'programs' && wingsList.length === 0) {
         const uniqueWings = [...new Set(res.data.map(p => p.wing))].filter(Boolean);
         setWingsList(uniqueWings);
@@ -99,9 +97,8 @@ const Reports = () => {
     }
   };
 
-  // CSV Generator Utility
   const downloadCSV = () => {
-    if (data.length === 0) {
+    if (data.length === 0 && !data.records) {
       setToastType('error');
       setToastMessage('No data available to download.');
       return;
@@ -114,58 +111,54 @@ const Reports = () => {
     if (reportType === 'programs') {
       headers = ['Title', 'Wing', 'Type', 'Date', 'Venue', 'Participants Limit', 'Status', 'Approved'];
       rows = data.map(p => [
-        p.title,
-        p.wing,
-        p.type,
-        new Date(p.date).toLocaleDateString(),
-        p.venue,
-        p.maxParticipants || 'Unlimited',
-        p.status,
-        p.approved ? 'Yes' : 'No'
+        p.title, p.wing, p.type,
+        new Date(p.date).toLocaleDateString(), p.venue,
+        p.maxParticipants || 'Unlimited', p.status, p.approved ? 'Yes' : 'No'
       ]);
     } else if (reportType === 'schedules') {
       headers = ['Program Title', 'Wing', 'Date', 'Time', 'Venue', 'Description'];
       rows = data.map(s => [
-        s.programId?.title || 'Unknown',
-        s.programId?.wing || 'N/A',
-        new Date(s.date).toLocaleDateString(),
-        s.time,
-        s.venue,
-        s.description || ''
+        s.programId?.title || 'Unknown', s.programId?.wing || 'N/A',
+        new Date(s.date).toLocaleDateString(), s.time, s.venue, s.description || ''
       ]);
     } else if (reportType === 'results') {
       headers = ['Program Title', 'Winner Standings (Position - Recipient - Points - Grade)'];
       rows = data.map(r => {
-        const standings = r.winners.map(w => 
+        const standings = r.winners.map(w =>
           `${w.position}: ${w.studentId?.name || w.groupId?.name || 'Unknown'} (${w.points} pts, Grade ${w.grade || 'N/A'})`
         ).join(' | ');
-        return [
-          r.programId?.title || 'Unknown',
-          standings
-        ];
+        return [r.programId?.title || 'Unknown', standings];
       });
     } else if (reportType === 'wing_wise') {
       headers = ['Wing Name', 'Programs Created'];
-      // if wingsData exists
       const wingBreakdown = data.wingsData || [];
       rows = wingBreakdown.map(w => [w._id, w.programsCount]);
     } else if (reportType === 'student_wise') {
       headers = ['Student Name', 'Student ID', 'Wing', 'Email', 'Phone'];
       rows = data.map(s => [s.name, s.studentId, s.wing, s.email || '', s.phone || '']);
+    } else if (reportType === 'outreach') {
+      headers = ['Student Name', 'Student ID', 'Wing', 'Class', 'Program Name', 'Date', 'Organization', 'Program Type', 'Position'];
+      const records = data.records || [];
+      rows = records.map(r => [
+        r.student?.name || 'N/A',
+        r.student?.studentId || 'N/A',
+        r.student?.wing || 'N/A',
+        r.student?.className || 'N/A',
+        r.programName, new Date(r.date).toLocaleDateString(),
+        r.organization, r.programType, r.position
+      ]);
     }
 
-    // Combine headers and rows
     csvContent += headers.join(',') + '\n';
     rows.forEach(row => {
-      const escapedRow = row.map(val => `"${String(val).replace(/"/g, '""')}"`);
+      const escapedRow = row.map(val => `"${String(val).replace(/"/g, '""""')}"`);
       csvContent += escapedRow.join(',') + '\n';
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    
-    const fileName = `ShaadMates_${reportType}_Report_M${selectedMonth}_Y${selectedYear}.csv`;
+    const fileName = `ShaadMates_${reportType}_Report_${Date.now()}.csv`;
     link.setAttribute('href', url);
     link.setAttribute('download', fileName);
     link.style.visibility = 'hidden';
@@ -178,28 +171,9 @@ const Reports = () => {
     logReportDownload(`Exported CSV for ${reportType}`);
   };
 
-  const handlePrint = async () => {
+  const handlePrint = () => {
     logReportDownload(`Printed report sheet for ${reportType}`);
-    const input = document.getElementById('report-pdf-area');
-    if (!input) return;
-    
-    setLoading(true);
-    try {
-      const canvas = await html2canvas(input, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`ShaadMates_${reportType}_Report.pdf`);
-    } catch (err) {
-      console.error(err);
-      setToastType('error');
-      setToastMessage('Failed to generate PDF');
-    } finally {
-      setLoading(false);
-    }
+    window.print();
   };
 
   const months = [
@@ -225,6 +199,7 @@ const Reports = () => {
           { id: 'programs', label: 'Monthly Programs' },
           { id: 'schedules', label: 'Monthly Schedules' },
           { id: 'results', label: 'Result Reports' },
+          { id: 'outreach', label: '🌍 Outreach Report' },
           { id: 'wing_wise', label: 'Wing Reports' },
           { id: 'student_wise', label: 'Student Sheets' }
         ].map(tab => (
@@ -313,7 +288,7 @@ const Reports = () => {
       )}
 
       {/* Document View Wrapper (Print Friendly) */}
-      <div id="report-pdf-area" className="bg-white dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+      <div className="bg-white dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
         {/* Printable Header */}
         <div className="text-center border-b pb-6 border-slate-100 dark:border-slate-800/80">
           <h2 className="text-2xl font-extrabold font-sans">Shaad-Mates Program Management</h2>
@@ -456,26 +431,83 @@ const Reports = () => {
             {reportType === 'student_wise' && (
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-300 dark:border-slate-800 text-slate-500 font-bold">
-                    <th className="py-3">Student Name</th>
-                    <th className="py-3">Student ID</th>
-                    <th className="py-3">Wing</th>
-                    <th className="py-3">Email Address</th>
-                    <th className="py-3">Phone</th>
+                  <tr className="border-b-2 border-slate-300 dark:border-slate-700 text-slate-600 font-bold bg-slate-50 dark:bg-slate-800">
+                    <th className="py-3 px-4">Student Name</th>
+                    <th className="py-3 px-4">Student ID</th>
+                    <th className="py-3 px-4">Wing</th>
+                    <th className="py-3 px-4">Email Address</th>
+                    <th className="py-3 px-4">Phone</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
                   {data.map(s => (
                     <tr key={s._id} className="hover:bg-slate-500/5">
-                      <td className="py-3 font-semibold text-slate-800 dark:text-slate-200">{s.name}</td>
-                      <td className="py-3 font-mono">{s.studentId}</td>
-                      <td className="py-3 font-bold text-cyan-dark">{s.wing}</td>
-                      <td className="py-3">{s.email || 'N/A'}</td>
-                      <td className="py-3">{s.phone || 'N/A'}</td>
+                      <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">{s.name}</td>
+                      <td className="py-3 px-4 font-mono">{s.studentId}</td>
+                      <td className="py-3 px-4 font-bold text-cyan-dark">{s.wing}</td>
+                      <td className="py-3 px-4">{s.email || 'N/A'}</td>
+                      <td className="py-3 px-4">{s.phone || 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            )}
+
+            {/* 6. Outreach Report */}
+            {reportType === 'outreach' && (
+              <div className="space-y-6">
+                {/* Summary Stats */}
+                {data.total > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 no-print">
+                    {Object.entries(data.byType || {}).map(([type, count]) => (
+                      <div key={type} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
+                        <p className="text-xl font-black text-royal">{count}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{type}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b-2 border-slate-300 dark:border-slate-700 text-slate-600 font-bold bg-slate-50 dark:bg-slate-800">
+                      <th className="py-3 px-4">Student Name</th>
+                      <th className="py-3 px-4">Student ID</th>
+                      <th className="py-3 px-4">Wing</th>
+                      <th className="py-3 px-4">Program Name</th>
+                      <th className="py-3 px-4">Date</th>
+                      <th className="py-3 px-4">Organization</th>
+                      <th className="py-3 px-4">Type</th>
+                      <th className="py-3 px-4">Position</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                    {(data.records || []).map((r, i) => (
+                      <tr key={i} className="hover:bg-slate-500/5">
+                        <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">{r.student?.name || 'N/A'}</td>
+                        <td className="py-3 px-4 font-mono text-slate-500">{r.student?.studentId || 'N/A'}</td>
+                        <td className="py-3 px-4 font-medium text-royal">{r.student?.wing || 'N/A'}</td>
+                        <td className="py-3 px-4 font-medium">{r.programName}</td>
+                        <td className="py-3 px-4 whitespace-nowrap">{new Date(r.date).toLocaleDateString('en-IN')}</td>
+                        <td className="py-3 px-4 text-slate-500">{r.organization}</td>
+                        <td className="py-3 px-4">
+                          <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 font-semibold">{r.programType}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-0.5 rounded-full font-bold border ${
+                            r.position === '1st Position' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                            r.position === '2nd Position' ? 'bg-slate-100 text-slate-600 border-slate-300' :
+                            r.position === '3rd Position' ? 'bg-orange-50 text-orange-600 border-orange-200' :
+                            'bg-blue-50 text-blue-600 border-blue-200'
+                          }`}>{r.position}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {(!data.records || data.records.length === 0) && (
+                  <div className="py-12 text-center text-slate-400 italic">No outreach records found.</div>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -484,35 +516,18 @@ const Reports = () => {
       {/* Print styles */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
-          body {
-            background: white !important;
-            color: black !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-          header, sidebar, aside {
-            display: none !important;
-          }
-          .printable-section {
-            padding: 0 !important;
-            margin: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
-            background: white !important;
-          }
-          .printable-section * {
-            background: transparent !important;
-            box-shadow: none !important;
-          }
-          table {
-            border-collapse: collapse !important;
-            width: 100% !important;
-          }
-          th, td {
-            border: 1px solid #ddd !important;
-            padding: 8px !important;
-          }
+          @page { size: A4 landscape; margin: 15mm; }
+          body { background: white !important; color: black !important; font-family: Arial, sans-serif; font-size: 11px; }
+          .no-print { display: none !important; }
+          header, aside, nav { display: none !important; }
+          .printable-section { padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; background: white !important; }
+          .printable-section * { background: transparent !important; box-shadow: none !important; color: black !important; }
+          table { border-collapse: collapse !important; width: 100% !important; font-size: 10px; }
+          th { background: #f1f5f9 !important; color: #374151 !important; font-weight: bold; }
+          th, td { border: 1px solid #cbd5e1 !important; padding: 6px 10px !important; text-align: left; }
+          tr:nth-child(even) td { background: #f8fafc !important; }
+          h2 { font-size: 18px; margin-bottom: 4px; }
+          p { margin: 2px 0; }
         }
       `}} />
 

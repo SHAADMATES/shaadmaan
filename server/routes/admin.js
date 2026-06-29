@@ -15,14 +15,14 @@ router.use(protect, authorize('admin', 'super_admin'));
 router.get('/stats', async (req, res) => {
   try {
     const totalStudents = await prisma.student.count();
-    const totalWingManagers = await prisma.wingChairman.count(); // keep variable name same for UI compatibility
+    const totalWingManagers = await prisma.wingChairman.count();
     const totalPrograms = await prisma.program.count();
     const totalRegistrations = await prisma.registration.count();
     const completedPrograms = await prisma.program.count({
       where: { status: { in: ['Completed', 'Result Published'] } }
     });
     const resultsPublished = await prisma.result.count();
-    const publicationsCount = await prisma.publication.count({ where: { status: 'Approved' } });
+    const outreachCount = await prisma.outreach.count();
     const certificatesIssued = await prisma.certificate.count();
     
     // Group programs by wing and count
@@ -52,7 +52,7 @@ router.get('/stats', async (req, res) => {
       totalRegistrations,
       completedPrograms,
       resultsPublished,
-      publicationsCount,
+      outreachCount,
       certificatesIssued,
       wingsData,
       totalIncome,
@@ -184,8 +184,8 @@ router.delete('/students/:id', async (req, res) => {
     const student = await prisma.student.findUnique({ where: { id: req.params.id } });
     if (!student) return res.status(404).json({ message: 'Student not found.' });
 
-    // Transactions ensure data integrity
     await prisma.$transaction([
+      prisma.outreach.deleteMany({ where: { studentId: student.id } }),
       prisma.registration.deleteMany({ where: { studentId: student.id } }),
       prisma.student.delete({ where: { id: student.id } }),
       prisma.user.delete({ where: { id: student.userId } })
@@ -199,6 +199,69 @@ router.delete('/students/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Deletion failed.', error: error.message });
   }
+});
+
+// --- BULK UPLOAD ---
+router.post('/bulk-upload/students', async (req, res) => {
+  const { students } = req.body;
+  if (!Array.isArray(students) || students.length === 0) {
+    return res.status(400).json({ message: 'No student data provided.' });
+  }
+
+  const results = { success: 0, failed: 0, errors: [] };
+
+  for (const row of students) {
+    const { username, password, name, admissionNumber, class: className, wing, dob, phone, email, studentId } = row;
+    if (!username || !password || !name || !admissionNumber) {
+      results.failed++;
+      results.errors.push({ row: name || username, reason: 'Missing required fields (username, password, name, admissionNumber).' });
+      continue;
+    }
+    try {
+      const userExists = await prisma.user.findUnique({ where: { username } });
+      if (userExists) {
+        results.failed++;
+        results.errors.push({ row: name, reason: `Username "${username}" is already taken.` });
+        continue;
+      }
+      const admExists = await prisma.student.findFirst({ where: { admissionNumber } });
+      if (admExists) {
+        results.failed++;
+        results.errors.push({ row: name, reason: `Admission number "${admissionNumber}" is already registered.` });
+        continue;
+      }
+
+      const generatedStudentId = studentId || `STU-${Math.random().toString(36).substring(3, 9).toUpperCase()}`;
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await prisma.user.create({
+        data: { username, password: hashedPassword, plainPassword: password, role: 'student' }
+      });
+
+      await prisma.student.create({
+        data: {
+          userId: user.id,
+          name,
+          studentId: generatedStudentId,
+          admissionNumber,
+          className: className || 'Class XII',
+          wing: wing || '',
+          dob: dob ? new Date(dob) : new Date(),
+          phone: phone || '',
+          email: email || ''
+        }
+      });
+      results.success++;
+    } catch (err) {
+      results.failed++;
+      results.errors.push({ row: name || username, reason: err.message });
+    }
+  }
+
+  await prisma.auditLog.create({
+    data: { userId: req.user.id, username: req.user.username, action: 'BULK_UPLOAD', details: `Bulk uploaded students: ${results.success} succeeded, ${results.failed} failed.` }
+  });
+
+  res.json({ message: `Bulk upload complete. ${results.success} added, ${results.failed} failed.`, results });
 });
 
 // --- WING CHAIRMAN CRUD ---
@@ -237,7 +300,6 @@ router.post('/wing-managers', async (req, res) => {
       data: { userId: user.id, name, wing, phone: phone || '', email: email || '' }
     });
 
-    // Automatically create or update Wing
     const wingDoc = await prisma.wing.findUnique({ where: { name: wing } });
     if (wingDoc) {
       await prisma.wing.update({ where: { id: wingDoc.id }, data: { chairmanId: manager.id } });
@@ -472,6 +534,105 @@ router.delete('/wings/:id', async (req, res) => {
   }
 });
 
+// --- OUTREACH MANAGEMENT ---
+router.get('/outreach', async (req, res) => {
+  try {
+    const outreach = await prisma.outreach.findMany({
+      include: { student: { select: { name: true, wing: true, className: true } } },
+      orderBy: { date: 'desc' }
+    });
+    const mapped = outreach.map(o => ({
+      ...o,
+      studentName: o.student?.name,
+      wing: o.student?.wing,
+      className: o.student?.className
+    }));
+    res.json(mapped);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching outreach records.', error: error.message });
+  }
+});
+
+router.post('/outreach', async (req, res) => {
+  const { studentId, programName, date, organization, programType, position } = req.body;
+  if (!studentId || !programName || !date || !organization) {
+    return res.status(400).json({ message: 'Student, program name, date, and organization are required.' });
+  }
+  try {
+    const student = await prisma.student.findUnique({ where: { id: studentId } });
+    if (!student) return res.status(404).json({ message: 'Student not found.' });
+
+    const record = await prisma.outreach.create({
+      data: {
+        studentId,
+        programName,
+        date: new Date(date),
+        organization,
+        programType: programType || 'Cultural',
+        position: position || 'Participation'
+      }
+    });
+
+    await prisma.auditLog.create({
+      data: { userId: req.user.id, username: req.user.username, action: 'ADD_OUTREACH', details: `Added outreach for ${student.name}: ${programName}` }
+    });
+
+    res.status(201).json(record);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to add outreach record.', error: error.message });
+  }
+});
+
+router.put('/outreach/:id', async (req, res) => {
+  const { programName, date, organization, programType, position } = req.body;
+  try {
+    const record = await prisma.outreach.findUnique({ where: { id: req.params.id } });
+    if (!record) return res.status(404).json({ message: 'Outreach record not found.' });
+
+    const updated = await prisma.outreach.update({
+      where: { id: record.id },
+      data: {
+        programName: programName || record.programName,
+        date: date ? new Date(date) : record.date,
+        organization: organization || record.organization,
+        programType: programType || record.programType,
+        position: position || record.position
+      }
+    });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: 'Update failed.', error: error.message });
+  }
+});
+
+router.delete('/outreach/:id', async (req, res) => {
+  try {
+    await prisma.outreach.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Outreach record deleted.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Deletion failed.', error: error.message });
+  }
+});
+
+// @route GET /api/admin/outreach/report — Outreach report data
+router.get('/outreach/report', async (req, res) => {
+  try {
+    const outreach = await prisma.outreach.findMany({
+      include: { student: { select: { name: true, wing: true, className: true, studentId: true } } },
+      orderBy: { date: 'desc' }
+    });
+    const byType = {};
+    const byPosition = {};
+    outreach.forEach(o => {
+      byType[o.programType] = (byType[o.programType] || 0) + 1;
+      byPosition[o.position] = (byPosition[o.position] || 0) + 1;
+    });
+    res.json({ records: outreach, byType, byPosition, total: outreach.length });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to generate outreach report.', error: error.message });
+  }
+});
+
 // --- PROGRAM APPROVAL & MANAGE ---
 router.get('/programs', async (req, res) => {
   try {
@@ -620,7 +781,6 @@ router.post('/results', async (req, res) => {
       });
     }
 
-    // Automatically trigger Certificate Generation for Winners (1st, 2nd, 3rd)
     for (let w of winners) {
       if (['1st', '2nd', '3rd'].includes(w.position)) {
         const certId = `CERT-${programId.toString().substring(18)}-${Math.random().toString(36).substring(7).toUpperCase()}`;
@@ -629,13 +789,7 @@ router.post('/results', async (req, res) => {
           const certExists = await prisma.certificate.findFirst({ where: { studentId: w.studentId, programId } });
           if (!certExists) {
             await prisma.certificate.create({
-              data: {
-                certificateId: certId,
-                studentId: w.studentId,
-                programId,
-                position: w.position,
-                grade: w.grade
-              }
+              data: { certificateId: certId, studentId: w.studentId, programId, position: w.position, grade: w.grade }
             });
           }
         } else if (type === 'group' && w.groupId) {
@@ -646,13 +800,7 @@ router.post('/results', async (req, res) => {
               if (!memberCertExists) {
                 const memberCertId = `CERT-${programId.toString().substring(18)}-${Math.random().toString(36).substring(7).toUpperCase()}`;
                 await prisma.certificate.create({
-                  data: {
-                    certificateId: memberCertId,
-                    studentId: m.id,
-                    programId,
-                    position: w.position,
-                    grade: w.grade
-                  }
+                  data: { certificateId: memberCertId, studentId: m.id, programId, position: w.position, grade: w.grade }
                 });
               }
             }
@@ -661,11 +809,7 @@ router.post('/results', async (req, res) => {
       }
     }
 
-    await prisma.program.update({
-      where: { id: programId },
-      data: { status: 'Result Published' }
-    });
-
+    await prisma.program.update({ where: { id: programId }, data: { status: 'Result Published' } });
     res.status(201).json(result);
   } catch (error) {
     res.status(500).json({ message: 'Result publication failed.', error: error.message });
@@ -675,14 +819,8 @@ router.post('/results', async (req, res) => {
 // --- CERTIFICATES ---
 router.get('/certificates', async (req, res) => {
   try {
-    const certs = await prisma.certificate.findMany({
-      include: { student: true, program: true }
-    });
-    const mappedCerts = certs.map(c => ({
-      ...c,
-      studentId: c.student,
-      programId: c.program
-    }));
+    const certs = await prisma.certificate.findMany({ include: { student: true, program: true } });
+    const mappedCerts = certs.map(c => ({ ...c, studentId: c.student, programId: c.program }));
     res.json(mappedCerts);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving certificates.' });
@@ -693,9 +831,7 @@ router.post('/certificates', async (req, res) => {
   const { studentId, programId, position, grade } = req.body;
   try {
     const certificateId = `CERT-${programId.substring(18)}-${Math.random().toString(36).substring(7).toUpperCase()}`;
-    const cert = await prisma.certificate.create({
-      data: { certificateId, studentId, programId, position, grade }
-    });
+    const cert = await prisma.certificate.create({ data: { certificateId, studentId, programId, position, grade } });
     res.status(201).json(cert);
   } catch (error) {
     res.status(400).json({ message: 'Manual generation failed.' });
@@ -708,30 +844,6 @@ router.delete('/certificates/:id', async (req, res) => {
     res.json({ message: 'Certificate revoked.' });
   } catch (error) {
     res.status(500).json({ message: 'Revocation failed.' });
-  }
-});
-
-// --- PUBLICATIONS APPROVALS ---
-router.get('/publications', async (req, res) => {
-  try {
-    const pubs = await prisma.publication.findMany({ include: { student: true } });
-    const mappedPubs = pubs.map(p => ({ ...p, studentId: p.student }));
-    res.json(mappedPubs);
-  } catch (error) {
-    res.status(500).json({ message: 'Error loading publications.' });
-  }
-});
-
-router.put('/publications/:id/status', async (req, res) => {
-  const { status } = req.body;
-  try {
-    const pub = await prisma.publication.update({
-      where: { id: req.params.id },
-      data: { status }
-    });
-    res.json(pub);
-  } catch (error) {
-    res.status(500).json({ message: 'Review failed.' });
   }
 });
 
@@ -759,11 +871,8 @@ router.post('/form-fields', async (req, res) => {
   if (!formName || !label || !name || !type) {
     return res.status(400).json({ message: 'Form name, label, field name, and type are required.' });
   }
-
   try {
-    const field = await prisma.formField.create({
-      data: { formName, label, name, type, required: !!required }
-    });
+    const field = await prisma.formField.create({ data: { formName, label, name, type, required: !!required } });
     res.status(201).json(field);
   } catch (error) {
     res.status(500).json({ message: 'Failed to create form field.' });
@@ -794,13 +903,7 @@ router.post('/reports/log', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        role: true,
-        isActive: true,
-        createdAt: true
-      }
+      select: { id: true, username: true, role: true, isActive: true, createdAt: true }
     });
     res.json(users);
   } catch (error) {
@@ -813,28 +916,15 @@ router.post('/users', async (req, res) => {
   if (!username || !password || !role) {
     return res.status(400).json({ message: 'Username, password, and role are required.' });
   }
-
   try {
     const userExists = await prisma.user.findUnique({ where: { username } });
     if (userExists) return res.status(400).json({ message: 'Username is taken.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: {
-        username,
-        password: hashedPassword,
-        plainPassword: password,
-        role
-      }
-    });
+    const user = await prisma.user.create({ data: { username, password: hashedPassword, plainPassword: password, role } });
 
     await prisma.auditLog.create({
-      data: {
-        userId: req.user.id,
-        username: req.user.username,
-        action: 'ADD_USER',
-        details: `Admin created user account @${username} with role ${role}`
-      }
+      data: { userId: req.user.id, username: req.user.username, action: 'ADD_USER', details: `Admin created user account @${username} with role ${role}` }
     });
 
     res.status(201).json(user);
@@ -843,86 +933,66 @@ router.post('/users', async (req, res) => {
   }
 });
 
-// @route   POST /api/admin/upload
-// @desc    Upload image (Base64) and save to server uploads/ directory
+// @route POST /api/admin/upload — image upload
 router.post('/upload', async (req, res) => {
   const { image } = req.body;
-  if (!image) {
-    return res.status(400).json({ message: 'No image data provided.' });
-  }
+  if (!image) return res.status(400).json({ message: 'No image data provided.' });
 
   try {
     const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
     if (!matches || matches.length !== 3) {
-      return res.status(400).json({ message: 'Invalid image format. Expected dataURI base64.' });
+      return res.status(400).json({ message: 'Invalid image format.' });
     }
-
     const mimeType = matches[1];
     const ext = mimeType.split('/')[1] || 'png';
     const buffer = Buffer.from(matches[2], 'base64');
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
-
-    const uploadsDir = path.join(process.cwd(), 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir);
-    }
-
+    const uploadsDir = process.env.NODE_ENV === 'production'
+      ? '/tmp/uploads'
+      : path.join(process.cwd(), 'uploads');
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
     fs.writeFileSync(path.join(uploadsDir, filename), buffer);
-    const fileUrl = `http://localhost:5000/uploads/${filename}`;
-    res.json({ url: fileUrl });
+    const baseUrl = process.env.NODE_ENV === 'production'
+      ? process.env.API_URL || 'https://shaadmaan-api.vercel.app'
+      : 'http://localhost:5000';
+    res.json({ url: `${baseUrl}/uploads/${filename}` });
   } catch (error) {
     res.status(500).json({ message: 'Image upload failed.', error: error.message });
   }
 });
 
-// @route   GET /api/admin/programs/:programId/registrations
-// @desc    Get all registrations for a program
+// @route GET /api/admin/programs/:programId/registrations
 router.get('/programs/:programId/registrations', async (req, res) => {
   try {
     const regs = await prisma.registration.findMany({
       where: { programId: req.params.programId },
-      include: {
-        program: true,
-        student: true,
-        group: { include: { members: true } }
-      }
+      include: { program: true, student: true, group: { include: { members: true } } }
     });
-    const mappedRegs = regs.map(r => ({
-      ...r,
-      programId: r.program,
-      studentId: r.student,
-      groupId: r.group
-    }));
+    const mappedRegs = regs.map(r => ({ ...r, programId: r.program, studentId: r.student, groupId: r.group }));
     res.json(mappedRegs);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving registrations.', error: error.message });
   }
 });
 
-// @route   GET /api/admin/settings
-// @desc    Get system settings
+// @route GET /api/admin/settings
 router.get('/settings', async (req, res) => {
   try {
     let settings = await prisma.systemSetting.findFirst();
-    if (!settings) {
-      settings = await prisma.systemSetting.create({ data: {} });
-    }
+    if (!settings) settings = await prisma.systemSetting.create({ data: {} });
     res.json(settings);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving settings.', error: error.message });
   }
 });
 
-// @route   POST /api/admin/settings
-// @desc    Create/Update system settings
+// @route POST /api/admin/settings
 router.post('/settings', async (req, res) => {
   const { orgName, orgLogo, orgEmail, signatureUrl } = req.body;
   try {
     let settings = await prisma.systemSetting.findFirst();
     if (!settings) {
-      settings = await prisma.systemSetting.create({
-        data: { orgName, orgLogo, orgEmail, signatureUrl }
-      });
+      settings = await prisma.systemSetting.create({ data: { orgName, orgLogo, orgEmail, signatureUrl } });
     } else {
       settings = await prisma.systemSetting.update({
         where: { id: settings.id },
@@ -936,12 +1006,7 @@ router.post('/settings', async (req, res) => {
     }
 
     await prisma.auditLog.create({
-      data: {
-        userId: req.user.id,
-        username: req.user.username,
-        action: 'UPDATE_SETTINGS',
-        details: 'Updated global system settings and signature.'
-      }
+      data: { userId: req.user.id, username: req.user.username, action: 'UPDATE_SETTINGS', details: 'Updated global system settings.' }
     });
 
     res.json(settings);
@@ -950,18 +1015,14 @@ router.post('/settings', async (req, res) => {
   }
 });
 
-// @route   PUT /api/admin/certificates/:id/approve
-// @desc    Approve/revoke certificate
+// @route PUT /api/admin/certificates/:id/approve
 router.put('/certificates/:id/approve', async (req, res) => {
   const { approved } = req.body;
   try {
     const cert = await prisma.certificate.findUnique({ where: { id: req.params.id } });
     if (!cert) return res.status(404).json({ message: 'Certificate not found.' });
 
-    const updatedCert = await prisma.certificate.update({
-      where: { id: cert.id },
-      data: { approved }
-    });
+    const updatedCert = await prisma.certificate.update({ where: { id: cert.id }, data: { approved } });
 
     await prisma.auditLog.create({
       data: {

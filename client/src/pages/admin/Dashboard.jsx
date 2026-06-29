@@ -118,7 +118,7 @@ const Dashboard = () => {
   const secondaryStats = [
     { label: 'Completed Events', value: stats?.completedPrograms || 0, icon: Trophy, color: 'text-royal' },
     { label: 'Results Published', value: stats?.resultsPublished || 0, icon: Activity, color: 'text-emerald-500' },
-    { label: 'Publications', value: stats?.publicationsCount || 0, icon: BookOpen, color: 'text-purple-500' },
+    { label: 'Outreach Records', value: stats?.outreachCount || 0, icon: BookOpen, color: 'text-purple-500' },
     { label: 'Certificates Issued', value: stats?.certificatesIssued || 0, icon: Award, color: 'text-amber-500' },
   ];
 

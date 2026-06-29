@@ -22,6 +22,7 @@ import {
   Award,
   BookMarked,
   KeyRound,
+  Globe,
   X
 } from 'lucide-react';
 
@@ -33,6 +34,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const superAdminLinks = [
     { to: '/super/dashboard', label: 'Super Dashboard', icon: LayoutDashboard },
     { to: '/super/users', label: 'Manage Users', icon: Users },
+    { to: '/super/bulk-upload', label: 'Bulk Upload', icon: TrendingUp },
     { to: '/super/backups', label: 'System Backups', icon: Database },
     { to: '/super/audit-logs', label: 'Audit Logs', icon: ShieldCheck },
   ];
@@ -43,7 +45,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: '/admin/wings', label: 'Manage Wings', icon: UserSquare2 },
     { to: '/admin/users', label: 'User Directory', icon: UserCircle },
     { to: '/admin/forms', label: 'Forms Management', icon: FileSpreadsheet },
-    { to: '/admin/outreach', label: 'Outreach', icon: BookMarked },
+    { to: '/admin/outreach', label: 'Outreach Records', icon: Globe },
     { to: '/admin/programs', label: 'Manage Programs', icon: FolderKanban },
     { to: '/admin/schedule', label: 'Program Schedule', icon: Calendar },
     { to: '/admin/results', label: 'Add Results', icon: Trophy },
@@ -74,7 +76,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: '/student/schedule', label: 'Timeline Schedule', icon: Calendar },
     { to: '/student/my-results', label: 'My Results', icon: Trophy },
     { to: '/student/certificates', label: 'My Certificates', icon: Award },
-
     { to: '/student/profile', label: 'Profile Settings', icon: UserCircle },
   ];
 

@@ -43,7 +43,7 @@ const Certificates = () => {
   };
 
   const handlePrint = () => {
-    handleDownloadPDF();
+    window.print();
   };
 
   const handleDownloadPDF = async () => {

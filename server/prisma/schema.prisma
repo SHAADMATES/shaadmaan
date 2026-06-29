@@ -125,14 +125,15 @@ model Program {
 }
 
 model Outreach {
-  id              String   @id @default(uuid())
-  studentId       String
-  student         Student  @relation(fields: [studentId], references: [id])
-  programDate     DateTime
-  organization    String
-  type            String
-  position        String   @default("")
-  createdAt       DateTime @default(now())
+  id          String   @id @default(uuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  programName String
+  date        DateTime
+  organization String
+  programType String   @default("Cultural")
+  position    String   @default("Participation")
+  createdAt   DateTime @default(now())
 }
 
 model Registration {
@@ -209,7 +210,7 @@ model Student {
   certificates  Certificate[]
   ledGroups     Group[]        @relation("GroupLeader")
   memberGroups  Group[]        @relation("GroupMembers")
-  outreaches    Outreach[]
+  outreach      Outreach[]
   registrations Registration[]
   wonResults    Winner[]
 }

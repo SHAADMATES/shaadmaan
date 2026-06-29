@@ -16,7 +16,7 @@ import SuperDashboard from './pages/superadmin/Dashboard';
 import ManageUsers from './pages/superadmin/ManageUsers';
 import Backups from './pages/superadmin/Backups';
 import AuditLogs from './pages/superadmin/AuditLogs';
-import SuperBulkUpload from './pages/superadmin/BulkUpload';
+import BulkUpload from './pages/superadmin/BulkUpload';
 
 // Treasurer Pages
 import TreasurerDashboard from './pages/treasurer/Dashboard';
@@ -70,9 +70,9 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/super/dashboard" element={<SuperDashboard />} />
               <Route path="/super/users" element={<ManageUsers />} />
+              <Route path="/super/bulk-upload" element={<BulkUpload />} />
               <Route path="/super/backups" element={<Backups />} />
               <Route path="/super/audit-logs" element={<AuditLogs />} />
-              <Route path="/super/bulk-upload" element={<SuperBulkUpload />} />
             </Route>
           </Route>
 
@@ -131,7 +131,7 @@ function App() {
             </Route>
           </Route>
 
-          {/* Shared: Change Password — accessible to all logged-in roles */}
+          {/* Shared: Change Password */}
           <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'wing_chairman', 'treasurer', 'student']} />}>
             <Route element={<Layout />}>
               <Route path="/account/change-password" element={<ChangePassword />} />

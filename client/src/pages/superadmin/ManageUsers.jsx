@@ -45,7 +45,10 @@ const ManageUsers = () => {
   const [role, setRole] = useState('admin');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('ALL');
+  const [filterStatus, setFilterStatus] = useState('ALL');
   const [resetModal, setResetModal] = useState(null); // { userId, username }
+  const [roleModal, setRoleModal] = useState(null); // { userId, username, currentRole }
+  const [newRole, setNewRole] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -127,11 +130,28 @@ const ManageUsers = () => {
     }
   };
 
+  const handleChangeRole = async () => {
+    if (!newRole || newRole === roleModal?.currentRole) {
+      showToast('Please select a different role.', 'error');
+      return;
+    }
+    try {
+      await api.put(`/superadmin/users/${roleModal.userId}/role`, { role: newRole });
+      showToast(`@${roleModal.username}'s role changed to ${newRole}.`);
+      setRoleModal(null);
+      setNewRole('');
+      fetchUsers();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Role change failed.', 'error');
+    }
+  };
+
   const filteredUsers = users.filter(u => {
     const matchesSearch = u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (u.profile?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = filterRole === 'ALL' || u.role === filterRole;
-    return matchesSearch && matchesRole;
+    const matchesStatus = filterStatus === 'ALL' || (filterStatus === 'active' ? u.isActive : !u.isActive);
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   if (loading) {
@@ -263,6 +283,15 @@ const ManageUsers = () => {
           <option value="treasurer">Treasurer</option>
           <option value="student">Student</option>
         </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-royal/40"
+        >
+          <option value="ALL">All Statuses</option>
+          <option value="active">Active Only</option>
+          <option value="inactive">Inactive Only</option>
+        </select>
       </div>
 
       {/* Stats Row */}
@@ -335,6 +364,15 @@ const ManageUsers = () => {
                     {u.isActive ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
                   </button>
 
+                  {/* Change Role */}
+                  <button
+                    onClick={() => { setRoleModal({ userId: u.id, username: u.username, currentRole: u.role }); setNewRole(u.role); }}
+                    title="Change Role"
+                    className="p-2 rounded-xl border bg-violet-50 text-violet-600 border-violet-200 hover:bg-violet-100 dark:bg-violet-950/20 dark:border-violet-800 dark:text-violet-400 transition-all"
+                  >
+                    <Crown size={16} />
+                  </button>
+
                   {/* Reset Password */}
                   <button
                     onClick={() => { setResetModal({ userId: u.id, username: u.username }); setNewPassword(''); }}
@@ -389,6 +427,49 @@ const ManageUsers = () => {
               <button onClick={handleResetPassword} className="flex-1 py-2.5 rounded-2xl bg-royal hover:bg-royal-dark text-white font-bold text-sm shadow-lg transition-all flex items-center justify-center space-x-2">
                 <Key size={15} />
                 <span>Reset Password</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Role Modal */}
+      {roleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-scale">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl w-full max-w-md mx-4 space-y-6 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white">Change User Role</h3>
+                <p className="text-sm text-slate-500 mt-1">@{roleModal.username} — currently <strong>{roleModal.currentRole.replace('_', ' ')}</strong></p>
+              </div>
+              <button onClick={() => setRoleModal(null)} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">New Role</label>
+              <select
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-royal/40"
+              >
+                <option value="super_admin">👑 Super Admin</option>
+                <option value="admin">🛡️ Admin</option>
+                <option value="wing_chairman">🏛️ Wing Chairman</option>
+                <option value="treasurer">💰 Treasurer</option>
+                <option value="student">🎓 Student</option>
+              </select>
+            </div>
+            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 text-xs text-amber-700">
+              ⚠️ Changing a user's role will immediately affect their access permissions. Use with caution.
+            </div>
+            <div className="flex space-x-3">
+              <button onClick={() => setRoleModal(null)} className="flex-1 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                Cancel
+              </button>
+              <button onClick={handleChangeRole} className="flex-1 py-2.5 rounded-2xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm shadow-lg transition-all flex items-center justify-center space-x-2">
+                <Crown size={15} />
+                <span>Change Role</span>
               </button>
             </div>
           </div>

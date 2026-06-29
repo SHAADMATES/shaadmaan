@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
 import { Plus, Edit2, Trash2, Search, X, AlertCircle, FileSpreadsheet, Printer, Shield, User, Key, Image } from 'lucide-react';
 import Toast from '../../components/Toast';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 
 const Wings = () => {
   const [wings, setWings] = useState([]);
@@ -177,24 +175,8 @@ const Wings = () => {
   };
 
   // Print Page
-  const triggerPrint = async () => {
-    const input = document.getElementById('wing-table-area');
-    if (!input) return;
-    setLoading(true);
-    try {
-      const canvas = await html2canvas(input, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('ShaadMates_Wings.pdf');
-    } catch (err) {
-      setToastType('error');
-      setToastMessage('Failed to generate PDF');
-    } finally {
-      setLoading(false);
-    }
+  const triggerPrint = () => {
+    window.print();
   };
 
   const filteredWings = wings.filter(w => {
@@ -256,7 +238,7 @@ const Wings = () => {
       </div>
 
       {/* Main Table */}
-      <div id="wing-table-area" className="glass-card border rounded-3xl overflow-hidden shadow-lg print:border-none print:shadow-none">
+      <div className="glass-card border rounded-3xl overflow-hidden shadow-lg print:border-none print:shadow-none">
         {loading ? (
           <div className="p-12 text-center text-slate-400">
             <div className="w-10 h-10 border-4 border-royal border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
