@@ -318,7 +318,7 @@ const ManageOutreach = () => {
             placeholder="Search student, program, organization..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2.5 w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none"
+            className="form-input pl-9"
           />
         </div>
         <select value={filterType} onChange={e => setFilterType(e.target.value)} className="px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none">

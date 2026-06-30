@@ -198,7 +198,7 @@ const ChangePassword = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             {/* Current Password */}
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-500 flex items-center">
+              <label className="form-label  flex items-center">
                 <Lock size={11} className="mr-1 text-rose-500" /> Current Password (required)
               </label>
               <div className="relative">
@@ -206,7 +206,7 @@ const ChangePassword = () => {
                   type={showCurrent ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 pr-10 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-royal/20"
+                  className="form-input"
                   placeholder="Enter your current password"
                 />
                 <button
@@ -225,21 +225,21 @@ const ChangePassword = () => {
 
             {/* New Username */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 flex items-center">
+              <label className="form-label  flex items-center">
                 <User size={11} className="mr-1 text-royal" /> New Username (optional)
               </label>
               <input
                 type="text"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
-                className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-royal/20"
+                className="form-input"
                 placeholder="New username..."
               />
             </div>
 
             {/* New Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 flex items-center">
+              <label className="form-label  flex items-center">
                 <Key size={11} className="mr-1 text-emerald-500" /> New Password (optional)
               </label>
               <div className="relative">
@@ -247,7 +247,7 @@ const ChangePassword = () => {
                   type={showNew ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 pr-10 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-royal/20"
+                  className="form-input"
                   placeholder="New password (min 6 chars)"
                 />
                 <button
@@ -263,7 +263,7 @@ const ChangePassword = () => {
             {/* Confirm Password */}
             {newPassword && (
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-500 flex items-center">
+                <label className="form-label  flex items-center">
                   <Check size={11} className="mr-1 text-emerald-500" /> Confirm New Password
                 </label>
                 <input
@@ -324,7 +324,7 @@ const ChangePassword = () => {
                 type="text"
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className="form-input pl-9"
                 placeholder="Search by username or role..."
               />
             </div>
@@ -394,22 +394,22 @@ const ChangePassword = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500">New Username</label>
+                  <label className="form-label ">New Username</label>
                   <input
                     type="text"
                     value={resetNewUsername}
                     onChange={(e) => setResetNewUsername(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                    className="form-input"
                     placeholder="New username..."
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500">New Password</label>
+                  <label className="form-label ">New Password</label>
                   <input
                     type="text"
                     value={resetNewPassword}
                     onChange={(e) => setResetNewPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                    className="form-input"
                     placeholder="New password..."
                   />
                 </div>

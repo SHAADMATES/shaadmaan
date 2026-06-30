@@ -417,7 +417,7 @@ const ManageUsers = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Minimum 6 characters"
-                className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-royal/40"
+                className="form-input"
               />
             </div>
             <div className="flex space-x-3">
@@ -451,7 +451,7 @@ const ManageUsers = () => {
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-royal/40"
+                className="form-input"
               >
                 <option value="super_admin">👑 Super Admin</option>
                 <option value="admin">🛡️ Admin</option>

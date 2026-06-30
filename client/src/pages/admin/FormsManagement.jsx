@@ -117,7 +117,7 @@ const FormsManagement = () => {
             )}
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Target Module Form</label>
+              <label className="form-label  uppercase tracking-wider">Target Module Form</label>
               <select
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
@@ -131,7 +131,7 @@ const FormsManagement = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Label</label>
+              <label className="form-label  uppercase tracking-wider">Field Label</label>
               <input
                 type="text"
                 value={label}
@@ -142,7 +142,7 @@ const FormsManagement = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name (camelCase key)</label>
+              <label className="form-label  uppercase tracking-wider">Field Name (camelCase key)</label>
               <input
                 type="text"
                 value={name}
@@ -154,7 +154,7 @@ const FormsManagement = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Input Type</label>
+                <label className="form-label  uppercase tracking-wider">Input Type</label>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value)}

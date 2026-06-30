@@ -95,7 +95,7 @@ const AddProgram = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Title */}
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-500">Program Title *</label>
+              <label className="form-label ">Program Title *</label>
               <input
                 type="text"
                 value={title}
@@ -107,7 +107,7 @@ const AddProgram = () => {
 
             {/* Type */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500">Program Type *</label>
+              <label className="form-label ">Program Type *</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
@@ -120,7 +120,7 @@ const AddProgram = () => {
 
             {/* Max Participants */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500">Max Participants Limit (0 = Unlimited)</label>
+              <label className="form-label ">Max Participants Limit (0 = Unlimited)</label>
               <input
                 type="number"
                 value={maxParticipants}
@@ -132,7 +132,7 @@ const AddProgram = () => {
 
             {/* Date */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500">Target Date *</label>
+              <label className="form-label ">Target Date *</label>
               <input
                 type="date"
                 value={date}
@@ -143,7 +143,7 @@ const AddProgram = () => {
 
             {/* Time */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500">Target Time *</label>
+              <label className="form-label ">Target Time *</label>
               <input
                 type="text"
                 value={time}
@@ -155,7 +155,7 @@ const AddProgram = () => {
 
             {/* Venue */}
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-500">Venue *</label>
+              <label className="form-label ">Venue *</label>
               <input
                 type="text"
                 value={venue}
@@ -167,7 +167,7 @@ const AddProgram = () => {
 
             {/* Description */}
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-500">Description</label>
+              <label className="form-label ">Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -178,7 +178,7 @@ const AddProgram = () => {
 
             {/* Dynamic Rules List Builder */}
             <div className="space-y-2 sm:col-span-2 border-t border-slate-100 dark:border-slate-800 pt-4">
-              <label className="text-xs font-semibold text-slate-500 block">Rules & Regulations</label>
+              <label className="form-label  block">Rules & Regulations</label>
               
               <div className="flex space-x-2">
                 <input

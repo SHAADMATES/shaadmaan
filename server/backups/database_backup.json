@@ -1,311 +1,171 @@
 {
   "users": [
     {
-      "_id": "6a2946a774c0eeb85ec7ad84",
+      "id": "0622b079-f8d9-4f6f-b6f8-d4935b8faa73",
       "username": "superadmin",
-      "password": "",
+      "password": "$2a$10$9nLaSacUtfEEGd8wr2Esoe.1nLc8fINyps/zvmiSBcWJrWShq0fwO",
       "role": "super_admin",
-      "plainPassword": "super123",
-      "createdAt": "2026-06-10T11:12:39.093Z",
-      "__v": 0
+      "plainPassword": "Pass@123",
+      "isActive": true,
+      "createdAt": "2026-06-29T10:53:11.605Z"
     },
     {
-      "_id": "6a2946a774c0eeb85ec7ad86",
+      "id": "1439b217-3f51-46f3-a770-e66bc076de27",
       "username": "admin",
-      "password": "$2a$10$IBdyr2VnKCMLGcjJtHWFOOWbN6QKM3JxzlqtMJ8FSu/T./YaUKmXm",
+      "password": "$2a$10$9nLaSacUtfEEGd8wr2Esoe.1nLc8fINyps/zvmiSBcWJrWShq0fwO",
       "role": "admin",
-      "plainPassword": "admin123",
-      "createdAt": "2026-06-10T11:12:39.102Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2946a774c0eeb85ec7ad88",
-      "username": "chairman1",
-      "password": "$2a$10$fy23FK233IagqzWq5VO/dugFRw/fdr1aSc7AWnCkaMSNfyU5rCRRy",
-      "role": "wing_chairman",
-      "plainPassword": "chairman123",
-      "createdAt": "2026-06-10T11:12:39.104Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2946a774c0eeb85ec7ad8a",
-      "username": "treasurer1",
-      "password": "$2a$10$XVe2N2bkVoQ1.CugCrijlOEFr0qrNec4LtbgzU7kOXHdxaASIUEPm",
-      "role": "treasurer",
-      "plainPassword": "treasurer123",
-      "createdAt": "2026-06-10T11:12:39.106Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950649c60cf78556bcb95",
-      "username": "bro",
-      "password": "$2a$10$oAWL0PtvlBYWtBKrqgG9G.ZO/kWX5Y4yUHb6KazN7Ozb7tzz/104i",
-      "role": "wing_chairman",
-      "plainPassword": "bro",
-      "createdAt": "2026-06-10T11:54:12.161Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950789c60cf78556bcbae",
-      "username": "st",
-      "password": "$2a$10$vJOlAuh6j3uBYykzoYYepeMoeHZJGGzgGH2DFaq6Tuf7it3ksCCZC",
-      "role": "student",
-      "plainPassword": "st",
-      "createdAt": "2026-06-10T11:54:32.088Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a29528f9c60cf78556bcdd7",
-      "username": "hello",
-      "password": "$2a$10$j.kbK6Ek6fpDGMpuh2rVaeWDkqWgfurB8T.GPPBYb4RE9zJatbtHK",
-      "role": "treasurer",
-      "plainPassword": "bro",
-      "createdAt": "2026-06-10T12:03:27.345Z",
-      "__v": 0
+      "plainPassword": "Pass@123",
+      "isActive": true,
+      "createdAt": "2026-06-29T10:53:12.734Z"
     }
   ],
-  "students": [
-    {
-      "_id": "6a2950789c60cf78556bcbb0",
-      "userId": "6a2950789c60cf78556bcbae",
-      "name": "ashhar",
-      "studentId": "STU-Q5NFPS",
-      "admissionNumber": "ali",
-      "class": "Class XII",
-      "wing": "",
-      "photo": "",
-      "dob": "2026-06-10T11:54:32.091Z",
-      "address": "",
-      "phone": "",
-      "email": "asasashhar@gmail.com",
-      "createdAt": "2026-06-10T11:54:32.091Z",
-      "__v": 0
-    }
-  ],
-  "chairmen": [
-    {
-      "_id": "6a2946a774c0eeb85ec7ad90",
-      "userId": "6a2946a774c0eeb85ec7ad88",
-      "name": "Dr. Faisal Rahman",
-      "wing": "Red Wing",
-      "phone": "555-0101",
-      "email": "faisal@shaadmates.com",
-      "assistantName": "",
-      "photo": "",
-      "createdAt": "2026-06-10T11:12:39.112Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950649c60cf78556bcb97",
-      "userId": "6a2950649c60cf78556bcb95",
-      "name": "a",
-      "wing": "arabic wings",
-      "phone": "",
-      "email": "",
-      "assistantName": "a",
-      "photo": "",
-      "createdAt": "2026-06-10T11:54:12.164Z",
-      "__v": 0
-    }
-  ],
+  "students": [],
+  "chairmen": [],
   "auditLogs": [
     {
-      "_id": "6a2946a774c0eeb85ec7adb6",
+      "id": "695ed9b6-df49-4318-a7a3-9acf0c258e65",
+      "userId": null,
       "username": "system",
-      "action": "SYSTEM_SEED",
-      "details": "Successfully seeded database for Shaad-Mates WebSuite ERP.",
-      "timestamp": "2026-06-10T11:12:39.145Z",
-      "__v": 0
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username:          URDU WING",
+      "timestamp": "2026-06-29T10:44:31.886Z"
     },
     {
-      "_id": "6a2950419c60cf78556bcb6a",
-      "userId": "6a2946a774c0eeb85ec7ad86",
+      "id": "0a1f5553-2b7d-44f0-aeff-54e83b875069",
+      "userId": null,
+      "username": "system",
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username: admin",
+      "timestamp": "2026-06-29T10:44:42.500Z"
+    },
+    {
+      "id": "345c48d0-786f-4fbd-97e4-84ee3c80ee94",
+      "userId": null,
+      "username": "system",
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username:          urduwing",
+      "timestamp": "2026-06-29T10:44:44.519Z"
+    },
+    {
+      "id": "8eea72c7-0ce9-4e50-883c-20c79729523c",
+      "userId": null,
+      "username": "system",
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username:          @urduwing",
+      "timestamp": "2026-06-29T10:44:54.400Z"
+    },
+    {
+      "id": "10e2008c-4dad-4896-905d-90ee642338da",
+      "userId": null,
+      "username": "system",
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username: @urduwing",
+      "timestamp": "2026-06-29T10:45:05.203Z"
+    },
+    {
+      "id": "976b51f0-1845-4552-ab32-21c80b999ac8",
+      "userId": null,
+      "username": "system",
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username: urduwing",
+      "timestamp": "2026-06-29T10:45:10.198Z"
+    },
+    {
+      "id": "aa8d4ff5-84fc-4fd6-9d5d-5867c6a523b9",
+      "userId": null,
+      "username": "system",
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username: admin",
+      "timestamp": "2026-06-29T10:48:40.125Z"
+    },
+    {
+      "id": "2afbdb9b-e874-4c55-854d-0c8a069f5a42",
+      "userId": null,
+      "username": "system",
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username: admin",
+      "timestamp": "2026-06-29T10:48:50.291Z"
+    },
+    {
+      "id": "55c43958-b85f-4e23-b2b9-b06a03bc82e9",
+      "userId": null,
+      "username": "system",
+      "action": "FAILED_LOGIN",
+      "details": "Unregistered username: admin",
+      "timestamp": "2026-06-29T10:49:45.547Z"
+    },
+    {
+      "id": "5ec6ece9-cc6e-4047-ba76-916d3208c9ce",
+      "userId": "1439b217-3f51-46f3-a770-e66bc076de27",
+      "username": "admin",
+      "action": "FAILED_LOGIN",
+      "details": "Incorrect password.",
+      "timestamp": "2026-06-29T10:54:05.537Z"
+    },
+    {
+      "id": "7b527b19-21a1-48f5-ad21-20d4fd521639",
+      "userId": "0622b079-f8d9-4f6f-b6f8-d4935b8faa73",
+      "username": "superadmin",
+      "action": "FAILED_LOGIN",
+      "details": "Incorrect password.",
+      "timestamp": "2026-06-29T10:54:13.011Z"
+    },
+    {
+      "id": "39d0e176-e43e-4752-a44f-b6487e621ef3",
+      "userId": "0622b079-f8d9-4f6f-b6f8-d4935b8faa73",
+      "username": "superadmin",
+      "action": "FAILED_LOGIN",
+      "details": "Incorrect password.",
+      "timestamp": "2026-06-29T10:54:22.343Z"
+    },
+    {
+      "id": "ba39a637-f517-4eb8-b0fe-956374c236f4",
+      "userId": "0622b079-f8d9-4f6f-b6f8-d4935b8faa73",
+      "username": "superadmin",
+      "action": "FAILED_LOGIN",
+      "details": "Incorrect password.",
+      "timestamp": "2026-06-29T10:54:28.194Z"
+    },
+    {
+      "id": "5466e50f-501c-425b-8b44-d3bff7457a6d",
+      "userId": "0622b079-f8d9-4f6f-b6f8-d4935b8faa73",
+      "username": "superadmin",
+      "action": "FAILED_LOGIN",
+      "details": "Incorrect password.",
+      "timestamp": "2026-06-29T10:54:44.423Z"
+    },
+    {
+      "id": "aaa53b30-4b68-4bcd-b89a-0be0e869ae83",
+      "userId": "1439b217-3f51-46f3-a770-e66bc076de27",
+      "username": "admin",
+      "action": "FAILED_LOGIN",
+      "details": "Incorrect password.",
+      "timestamp": "2026-06-29T10:54:55.222Z"
+    },
+    {
+      "id": "07e4694f-c24f-4118-8e5a-20d5bf5426fe",
+      "userId": "1439b217-3f51-46f3-a770-e66bc076de27",
       "username": "admin",
       "action": "USER_LOGIN",
       "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T11:53:37.006Z",
-      "__v": 0
+      "timestamp": "2026-06-29T10:55:03.681Z"
     },
     {
-      "_id": "6a2950649c60cf78556bcb9b",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "ADD_WING",
-      "details": "Added Wing: arabic wings with Chairman: a",
-      "timestamp": "2026-06-10T11:54:12.169Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950789c60cf78556bcbb2",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "ADD_STUDENT",
-      "details": "Added student: ashhar (STU-Q5NFPS)",
-      "timestamp": "2026-06-10T11:54:32.094Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950829c60cf78556bcbbc",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "DELETE_STUDENT",
-      "details": "Deleted student: John Doe",
-      "timestamp": "2026-06-10T11:54:42.388Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950849c60cf78556bcbc6",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "DELETE_STUDENT",
-      "details": "Deleted student: Jane Smith",
-      "timestamp": "2026-06-10T11:54:44.670Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950929c60cf78556bcbcc",
-      "userId": "6a2950649c60cf78556bcb95",
-      "username": "bro",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as wing_chairman.",
-      "timestamp": "2026-06-10T11:54:58.076Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950b59c60cf78556bcbe1",
-      "userId": "6a2950789c60cf78556bcbae",
-      "username": "st",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as student.",
-      "timestamp": "2026-06-10T11:55:33.665Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2950d59c60cf78556bcc3e",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T11:56:05.355Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a29511d9c60cf78556bcc73",
-      "userId": "6a2950649c60cf78556bcb95",
-      "username": "bro",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as wing_chairman.",
-      "timestamp": "2026-06-10T11:57:17.167Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a29515b9c60cf78556bcc88",
-      "userId": "6a2950789c60cf78556bcbae",
-      "username": "st",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as student.",
-      "timestamp": "2026-06-10T11:58:19.478Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a29517c9c60cf78556bccdb",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T11:58:52.681Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2951b29c60cf78556bcd5a",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T11:59:46.299Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2951c99c60cf78556bcd77",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T12:00:09.062Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2951e09c60cf78556bcd98",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T12:00:32.845Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2952729c60cf78556bcdb5",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T12:02:58.196Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a29528f9c60cf78556bcdd9",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "ADD_USER",
-      "details": "Admin created user account @hello with role treasurer",
-      "timestamp": "2026-06-10T12:03:27.346Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2952979c60cf78556bcdde",
-      "userId": "6a29528f9c60cf78556bcdd7",
-      "username": "hello",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as treasurer.",
-      "timestamp": "2026-06-10T12:03:35.884Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2952b79c60cf78556bce0f",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T12:04:07.020Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2952db9c60cf78556bce2c",
-      "userId": "6a2950649c60cf78556bcb95",
-      "username": "bro",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as wing_chairman.",
-      "timestamp": "2026-06-10T12:04:43.620Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a29530f9c60cf78556bce33",
-      "userId": "6a2946a774c0eeb85ec7ad86",
-      "username": "admin",
-      "action": "USER_LOGIN",
-      "details": "Signed in successfully as admin.",
-      "timestamp": "2026-06-10T12:05:35.764Z",
-      "__v": 0
-    },
-    {
-      "_id": "6a2953329c60cf78556bce54",
-      "userId": "6a2946a774c0eeb85ec7ad84",
+      "id": "d5c853a0-5d23-4585-92a7-34f0ef3c6a2e",
+      "userId": "0622b079-f8d9-4f6f-b6f8-d4935b8faa73",
       "username": "superadmin",
       "action": "USER_LOGIN",
       "details": "Signed in successfully as super_admin.",
-      "timestamp": "2026-06-10T12:06:10.110Z",
-      "__v": 0
+      "timestamp": "2026-06-29T10:56:03.064Z"
+    },
+    {
+      "id": "f150d9fd-8dcb-46a0-9d5b-8e1708ec2668",
+      "userId": "0622b079-f8d9-4f6f-b6f8-d4935b8faa73",
+      "username": "superadmin",
+      "action": "SYSTEM_BACKUP",
+      "details": "Created database backup.",
+      "timestamp": "2026-06-29T10:56:20.441Z"
     }
   ],
-  "backedUpAt": "2026-06-10T12:06:27.649Z"
+  "backedUpAt": "2026-06-29T10:56:26.557Z"
 }

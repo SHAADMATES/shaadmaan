@@ -345,7 +345,7 @@ const ManageStudents = () => {
             placeholder="Search by name, admission no or username..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm w-full focus:outline-none focus:ring-2 focus:ring-royal/20"
+            className="form-input pl-9"
           />
         </div>
 
@@ -487,36 +487,36 @@ const ManageStudents = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Full name */}
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                  <label className="form-label  flex items-center space-x-1">
                     <User size={11} className="text-royal" /><span>Full Name *</span>
                   </label>
                   <input
                     type="text" value={name} onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                    className="form-input"
                     placeholder="Full name"
                   />
                 </div>
 
                 {/* Admission number */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                  <label className="form-label  flex items-center space-x-1">
                     <Hash size={11} className="text-royal" /><span>Admission No *</span>
                   </label>
                   <input
                     type="text" value={admissionNumber} onChange={(e) => setAdmissionNumber(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                    className="form-input"
                     placeholder="ADM2026-001"
                   />
                 </div>
 
                 {/* Wing (optional) */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                  <label className="form-label  flex items-center space-x-1">
                     <Shield size={11} className="text-royal" /><span>Wing (optional)</span>
                   </label>
                   <input
                     type="text" value={wing} onChange={(e) => setWing(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                    className="form-input"
                     placeholder="e.g. Red Wing"
                     list="wings-datalist"
                   />
@@ -527,42 +527,42 @@ const ManageStudents = () => {
 
                   {/* Class */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                    <label className="form-label  flex items-center space-x-1">
                       <GraduationCap size={11} className="text-royal" /><span>Class</span>
                     </label>
                     <input
                       type="text" value={className} onChange={(e) => setClassName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                      className="form-input"
                       placeholder="e.g. Class XII"
                     />
                   </div>
 
                   {/* Date of Birth */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                    <label className="form-label  flex items-center space-x-1">
                       <span>Date of Birth</span>
                     </label>
                     <input
                       type="date" value={dob} onChange={(e) => setDob(e.target.value)}
-                      className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                      className="form-input"
                     />
                   </div>
 
                   {/* Phone */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                    <label className="form-label  flex items-center space-x-1">
                       <span>Phone Number</span>
                     </label>
                     <input
                       type="text" value={phone} onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                      className="form-input"
                       placeholder="e.g. 1234567890"
                     />
                   </div>
 
                 {/* Student Photo Upload */}
                 <div className="space-y-2 sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                  <label className="form-label  flex items-center space-x-1">
                     <Image size={11} className="text-royal" /><span>Student Photo</span>
                   </label>
                   <div className="flex items-center space-x-3">
@@ -587,12 +587,12 @@ const ManageStudents = () => {
 
                 {/* Gmail/Email */}
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                  <label className="form-label  flex items-center space-x-1">
                     <Mail size={11} className="text-royal" /><span>Gmail / Email</span>
                   </label>
                   <input
                     type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                    className="form-input"
                     placeholder="student@gmail.com"
                   />
                 </div>
@@ -600,7 +600,7 @@ const ManageStudents = () => {
                 {/* Custom Fields */}
                 {customFields.map(field => (
                   <div key={field._id} className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs font-semibold text-slate-500">
+                    <label className="form-label ">
                       {field.label} {field.required && '*'}
                     </label>
                     {field.type === 'textarea' ? (
@@ -609,7 +609,7 @@ const ManageStudents = () => {
                         onChange={(e) => setCustomValues({ ...customValues, [field.name]: e.target.value })}
                         required={field.required}
                         rows="3"
-                        className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                        className="form-input"
                         placeholder={`Enter ${field.label.toLowerCase()}`}
                       />
                     ) : (
@@ -618,7 +618,7 @@ const ManageStudents = () => {
                         value={customValues[field.name] || ''}
                         onChange={(e) => setCustomValues({ ...customValues, [field.name]: e.target.value })}
                         required={field.required}
-                        className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                        className="form-input"
                         placeholder={`Enter ${field.label.toLowerCase()}`}
                       />
                     )}
@@ -633,18 +633,18 @@ const ManageStudents = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                  <label className="form-label  flex items-center space-x-1">
                     <User size={11} /><span>Username *</span>
                   </label>
                   <input
                     type="text" value={username} onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                    className="form-input"
                     placeholder="student_access"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 flex items-center space-x-1">
+                  <label className="form-label  flex items-center space-x-1">
                     <Key size={11} /><span>Password *</span>
                   </label>
                   <div className="relative">
@@ -652,7 +652,7 @@ const ManageStudents = () => {
                       type={showFormPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 pr-10 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-royal/20"
+                      className="form-input"
                       placeholder="••••••••"
                     />
                     <button type="button" onClick={() => setShowFormPassword(!showFormPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400">

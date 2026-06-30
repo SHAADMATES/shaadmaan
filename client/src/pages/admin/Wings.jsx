@@ -232,7 +232,7 @@ const Wings = () => {
             placeholder="Search by wing name, chairman or username..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-2xl text-sm w-full focus:outline-none focus:ring-2 focus:ring-royal/20"
+            className="form-input pl-9"
           />
         </div>
       </div>
@@ -340,7 +340,7 @@ const Wings = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Wing Name */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-500">Wing Name *</label>
+                  <label className="form-label ">Wing Name *</label>
                   <input
                     type="text"
                     value={name}
@@ -353,7 +353,7 @@ const Wings = () => {
 
                 {/* Chairman Name */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500">Chairman Name *</label>
+                  <label className="form-label ">Chairman Name *</label>
                   <input
                     type="text"
                     value={chairmanName}
@@ -365,7 +365,7 @@ const Wings = () => {
 
                 {/* Assistant Name */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500">Assistant Name</label>
+                  <label className="form-label ">Assistant Name</label>
                   <input
                     type="text"
                     value={assistantName}
@@ -377,7 +377,7 @@ const Wings = () => {
 
                 {/* Wing Image/Logo */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-500 flex items-center">
+                  <label className="form-label  flex items-center">
                     <Image size={12} className="mr-1 text-royal" /> Logo/Image Upload
                   </label>
                   <div className="flex items-center space-x-4">
@@ -415,7 +415,7 @@ const Wings = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500">Wing Username *</label>
+                  <label className="form-label ">Wing Username *</label>
                   <input
                     type="text"
                     value={username}
@@ -426,7 +426,7 @@ const Wings = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500">Wing Password *</label>
+                  <label className="form-label ">Wing Password *</label>
                   <input
                     type="password"
                     value={password}

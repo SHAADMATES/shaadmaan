@@ -81,7 +81,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Username Input */}
             <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+              <label className="form-label">
                 Username
               </label>
               <div className="relative">
@@ -92,7 +92,7 @@ const Login = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-11 pr-4 py-3.5 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-royal/40 focus:border-royal transition-all text-sm"
+                  className="form-input pl-11"
                   placeholder="Enter username"
                   disabled={loading}
                 />
@@ -101,7 +101,7 @@ const Login = () => {
 
             {/* Password Input */}
             <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+              <label className="form-label">
                 Password
               </label>
               <div className="relative">
@@ -112,7 +112,7 @@ const Login = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-11 pr-12 py-3.5 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-royal/40 focus:border-royal transition-all text-sm"
+                  className="form-input pl-11 pr-12"
                   placeholder="••••••••"
                   disabled={loading}
                 />
@@ -130,7 +130,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 px-4 bg-royal hover:bg-royal-dark text-white font-bold rounded-2xl transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center group glow-blue"
+              className="form-submit-btn glow-blue"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
