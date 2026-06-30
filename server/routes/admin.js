@@ -304,7 +304,7 @@ router.post('/bulk-upload/outreach', async (req, res) => {
       results.errors.push({ row: title, reason: err.message });
     }
   }
-  res.json({ message: \Bulk upload complete. \ added, \ failed.\, results });
+  res.json({ message: `Bulk upload complete. ${results.success} added, ${results.failed} failed.`, results });
 });
 
 router.post('/bulk-upload/programs', async (req, res) => {
@@ -336,7 +336,7 @@ router.post('/bulk-upload/programs', async (req, res) => {
       results.errors.push({ row: title, reason: err.message });
     }
   }
-  res.json({ message: \Bulk upload complete. \ added, \ failed.\, results });
+  res.json({ message: `Bulk upload complete. ${results.success} added, ${results.failed} failed.`, results });
 });
 
 // --- WING CHAIRMAN CRUD ---
