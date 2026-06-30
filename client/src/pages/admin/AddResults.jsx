@@ -187,11 +187,11 @@ const AddResults = () => {
         </div>
 
         <div className="space-y-1 max-w-md">
-          <label className="text-xs font-semibold text-slate-500">Choose Approved Program</label>
+          <label className="form-label  ">Choose Approved Program</label>
           <select
             value={selectedProgramId}
             onChange={(e) => handleProgramChange(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border dark:border-slate-850 rounded-xl text-sm focus:outline-none"
+            className="form-input"
           >
             <option value="">Select Program</option>
             {programs.map(p => (

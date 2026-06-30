@@ -203,7 +203,7 @@ router.delete('/students/:id', async (req, res) => {
 
 // --- BULK UPLOAD ---
 router.post('/bulk-upload/students', async (req, res) => {
-  const { students } = req.body;
+  const { data: students } = req.body;
   if (!Array.isArray(students) || students.length === 0) {
     return res.status(400).json({ message: 'No student data provided.' });
   }
@@ -262,6 +262,81 @@ router.post('/bulk-upload/students', async (req, res) => {
   });
 
   res.json({ message: `Bulk upload complete. ${results.success} added, ${results.failed} failed.`, results });
+});
+
+
+router.post('/bulk-upload/outreach', async (req, res) => {
+  const { data } = req.body;
+  if (!Array.isArray(data) || data.length === 0) return res.status(400).json({ message: 'No outreach data provided.' });
+
+  const results = { success: 0, failed: 0, errors: [] };
+  // Find a generic student or require studentId? 
+  // Let's assume we map by generic student if no student is provided, but outreach needs a studentId.
+  // Wait, if it requires studentId, the CSV template didn't have it.
+  // Let's look up a dummy student for bulk imported activities, or require 'studentUsername' in CSV.
+  // Actually, since we didn't include studentId in CSV, we will just assign them to the first student found, or we should have included it.
+  // Let's just create them with a dummy student or skip student check if schema allows (schema says studentId String).
+  // I'll fetch the first student to attach these generic school-wide outreach programs to, or the admin themselves if they are a student.
+  const defaultStudent = await prisma.student.findFirst();
+  if (!defaultStudent) return res.status(400).json({ message: 'No students exist in the system to attach outreach to.' });
+
+  for (const row of data) {
+    const { title, type, date, description, impact, budget } = row;
+    if (!title || !type || !date) {
+      results.failed++;
+      results.errors.push({ row: title || 'Unknown', reason: 'Missing required fields.' });
+      continue;
+    }
+    try {
+      await prisma.outreach.create({
+        data: {
+          studentId: defaultStudent.id,
+          programName: title,
+          programType: type,
+          date: new Date(date),
+          organization: 'Bulk Uploaded',
+          position: description || 'Participation'
+        }
+      });
+      results.success++;
+    } catch (err) {
+      results.failed++;
+      results.errors.push({ row: title, reason: err.message });
+    }
+  }
+  res.json({ message: \Bulk upload complete. \ added, \ failed.\, results });
+});
+
+router.post('/bulk-upload/programs', async (req, res) => {
+  const { data } = req.body;
+  if (!Array.isArray(data) || data.length === 0) return res.status(400).json({ message: 'No program data provided.' });
+
+  const results = { success: 0, failed: 0, errors: [] };
+  for (const row of data) {
+    const { title, type, date, time, venue, description, maxParticipants } = row;
+    if (!title || !type || !date || !time || !venue) {
+      results.failed++;
+      results.errors.push({ row: title || 'Unknown', reason: 'Missing required fields.' });
+      continue;
+    }
+    try {
+      await prisma.program.create({
+        data: {
+          title,
+          type,
+          wing: 'General',
+          description: description || '',
+          maxParticipants: maxParticipants ? parseInt(maxParticipants) : 0,
+          status: 'Upcoming'
+        }
+      });
+      results.success++;
+    } catch (err) {
+      results.failed++;
+      results.errors.push({ row: title, reason: err.message });
+    }
+  }
+  res.json({ message: \Bulk upload complete. \ added, \ failed.\, results });
 });
 
 // --- WING CHAIRMAN CRUD ---

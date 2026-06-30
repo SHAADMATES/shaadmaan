@@ -134,7 +134,7 @@ const SettingsPage = () => {
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Institution Branding</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">Institution Name</label>
+                <label className="form-label  ">Institution Name</label>
                 <input
                   type="text"
                   value={orgName}
@@ -145,7 +145,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">Branding Icon / Logo Emoji</label>
+                <label className="form-label  ">Branding Icon / Logo Emoji</label>
                 <input
                   type="text"
                   value={orgLogo}
@@ -156,7 +156,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="space-y-1 sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-500">Contact Email (Gmail)</label>
+                <label className="form-label  ">Contact Email (Gmail)</label>
                 <input
                   type="email"
                   value={orgEmail}
@@ -171,7 +171,7 @@ const SettingsPage = () => {
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Authorized Signature</label>
                 <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border dark:border-slate-800">
                   <div className="w-full sm:w-1/2 space-y-1">
-                    <label className="text-xs font-semibold text-slate-500 block">Upload Signature Image</label>
+                    <label className="form-label   block">Upload Signature Image</label>
                     <input
                       type="file"
                       accept="image/*"
@@ -230,7 +230,7 @@ const SettingsPage = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">New Password</label>
+                <label className="form-label  ">New Password</label>
                 <input
                   type="password"
                   value={password}
@@ -241,7 +241,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">Confirm Password</label>
+                <label className="form-label  ">Confirm Password</label>
                 <input
                   type="password"
                   value={confirmPassword}

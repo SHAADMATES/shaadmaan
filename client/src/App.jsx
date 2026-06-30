@@ -16,7 +16,6 @@ import SuperDashboard from './pages/superadmin/Dashboard';
 import ManageUsers from './pages/superadmin/ManageUsers';
 import Backups from './pages/superadmin/Backups';
 import AuditLogs from './pages/superadmin/AuditLogs';
-import BulkUpload from './pages/superadmin/BulkUpload';
 
 // Treasurer Pages
 import TreasurerDashboard from './pages/treasurer/Dashboard';
@@ -36,6 +35,7 @@ import AddResults from './pages/admin/AddResults';
 import Reports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/Settings';
 import ManageCertificates from './pages/admin/ManageCertificates';
+import BulkUpload from './pages/admin/BulkUpload';
 
 // Wing Manager Pages (Wing Chairman)
 import ManagerDashboard from './pages/manager/Dashboard';
@@ -70,7 +70,6 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/super/dashboard" element={<SuperDashboard />} />
               <Route path="/super/users" element={<ManageUsers />} />
-              <Route path="/super/bulk-upload" element={<BulkUpload />} />
               <Route path="/super/backups" element={<Backups />} />
               <Route path="/super/audit-logs" element={<AuditLogs />} />
             </Route>
@@ -90,6 +89,7 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/students" element={<ManageStudents />} />
+              <Route path="/admin/bulk-upload" element={<BulkUpload />} />
               <Route path="/admin/wings" element={<Wings />} />
               <Route path="/admin/users" element={<AllUsers />} />
               <Route path="/admin/forms" element={<FormsManagement />} />

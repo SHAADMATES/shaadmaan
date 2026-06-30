@@ -1,14 +1,59 @@
 import React, { useState, useRef } from 'react';
 import { api } from '../../context/AuthContext';
-import { Upload, Download, CheckCircle2, XCircle, AlertCircle, Users, FileText, RefreshCw, Trash2 } from 'lucide-react';
+import { Upload, Download, CheckCircle2, XCircle, AlertCircle, Users, FileText, RefreshCw, Trash2, Database } from 'lucide-react';
 import Toast from '../../components/Toast';
 
-const SAMPLE_CSV = `username,password,name,admissionNumber,class,wing,dob,phone,email
+const SAMPLES = {
+  students: {
+    csv: `username,password,name,admissionNumber,class,wing,dob,phone,email
 ali.ahmad,Pass@123,Ali Ahmad,ADM-2024-001,Class XI,Cultural Wing,2007-05-12,9876543210,ali@school.edu
-sara.khan,Pass@123,Sara Khan,ADM-2024-002,Class XII,Sports Wing,2006-09-20,9876543211,sara@school.edu
-umar.farooq,Pass@123,Umar Farooq,ADM-2024-003,Class XI,Academic Wing,2007-03-15,9876543212,umar@school.edu`;
+sara.khan,Pass@123,Sara Khan,ADM-2024-002,Class XII,Sports Wing,2006-09-20,9876543211,sara@school.edu`,
+    req: ['username', 'password', 'name', 'admissionNumber'],
+    cols: [
+      { col: 'username', req: true, note: 'Unique login username' },
+      { col: 'password', req: true, note: 'Initial password' },
+      { col: 'name', req: true, note: 'Full name' },
+      { col: 'admissionNumber', req: true, note: 'Unique admission no.' },
+      { col: 'class', req: false, note: 'e.g. Class XI' },
+      { col: 'wing', req: false, note: 'Wing name' },
+      { col: 'dob', req: false, note: 'YYYY-MM-DD format' },
+      { col: 'phone', req: false, note: 'Mobile number' },
+      { col: 'email', req: false, note: 'Email address' }
+    ]
+  },
+  outreach: {
+    csv: `title,type,date,description,impact,budget
+Community Clean-up,Environmental,2024-06-15,Cleaned local park,150,500
+Health Camp,Medical,2024-07-20,Free checkups for elderly,300,1200`,
+    req: ['title', 'type', 'date'],
+    cols: [
+      { col: 'title', req: true, note: 'Title of the activity' },
+      { col: 'type', req: true, note: 'Category (Environmental, etc.)' },
+      { col: 'date', req: true, note: 'YYYY-MM-DD format' },
+      { col: 'description', req: false, note: 'Details' },
+      { col: 'impact', req: false, note: 'Number of people affected' },
+      { col: 'budget', req: false, note: 'Estimated cost' }
+    ]
+  },
+  programs: {
+    csv: `title,type,date,time,venue,description,maxParticipants
+Annual Fest,Cultural,2024-10-15,10:00 AM,Main Hall,Cultural festival,500
+Sports Meet,Sports,2024-11-20,08:00 AM,Ground,Annual sports day,300`,
+    req: ['title', 'type', 'date', 'time', 'venue'],
+    cols: [
+      { col: 'title', req: true, note: 'Program title' },
+      { col: 'type', req: true, note: 'Program category' },
+      { col: 'date', req: true, note: 'YYYY-MM-DD format' },
+      { col: 'time', req: true, note: 'e.g., 10:00 AM' },
+      { col: 'venue', req: true, note: 'Location' },
+      { col: 'description', req: false, note: 'Details' },
+      { col: 'maxParticipants', req: false, note: 'Limit (0 for unlimited)' }
+    ]
+  }
+};
 
 const BulkUpload = () => {
+  const [entityType, setEntityType] = useState('students');
   const [rows, setRows] = useState([]);
   const [fileName, setFileName] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -58,7 +103,7 @@ const BulkUpload = () => {
     if (rows.length === 0) { showToast('No data to upload. Please import a CSV first.', 'error'); return; }
     setUploading(true);
     try {
-      const res = await api.post('/admin/bulk-upload/students', { students: rows });
+      const res = await api.post(`/admin/bulk-upload/${entityType}`, { data: rows });
       setResults(res.data.results);
       showToast(res.data.message, res.data.results.failed === 0 ? 'success' : 'error');
     } catch (err) {
@@ -69,30 +114,44 @@ const BulkUpload = () => {
   };
 
   const downloadSample = () => {
-    const blob = new Blob([SAMPLE_CSV], { type: 'text/csv' });
+    const blob = new Blob([SAMPLES[entityType].csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ShaadMates_BulkUpload_Template.csv';
+    a.download = `ShaadMates_${entityType.charAt(0).toUpperCase() + entityType.slice(1)}_Template.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const clearAll = () => { setRows([]); setFileName(''); setResults(null); if (fileRef.current) fileRef.current.value = ''; };
 
-  const requiredCols = ['username', 'password', 'name', 'admissionNumber'];
+  const requiredCols = SAMPLES[entityType].req;
   const colHeaders = rows.length > 0 ? Object.keys(rows[0]) : [];
   const missingCols = requiredCols.filter(c => !colHeaders.includes(c));
 
   return (
     <div className="p-6 space-y-8 animate-scale">
       {/* Header */}
-      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-violet-700 to-indigo-600 text-white shadow-xl">
-        <div className="flex items-center gap-3 mb-2">
-          <Users size={28} className="text-violet-200" />
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">Bulk Student Upload</h2>
+      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-violet-700 to-indigo-600 text-white shadow-xl flex justify-between items-center">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Database size={28} className="text-violet-200" />
+            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">Universal Bulk Upload</h2>
+          </div>
+          <p className="text-violet-100 text-sm">Upload multiple records at once using a CSV file.</p>
         </div>
-        <p className="text-violet-100 text-sm">Upload multiple students at once using a CSV file. Download the template to get started.</p>
+        <div className="w-48">
+          <label className="form-label text-violet-100 !text-violet-200">Select Entity</label>
+          <select 
+            value={entityType}
+            onChange={(e) => { setEntityType(e.target.value); clearAll(); }}
+            className="form-input !py-2 !bg-white/20 !border-white/10 !text-white [&>option]:text-slate-800"
+          >
+            <option value="students">Students</option>
+            <option value="outreach">Outreach Records</option>
+            <option value="programs">Programs</option>
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -104,27 +163,17 @@ const BulkUpload = () => {
             </h3>
             <ol className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
               <li className="flex gap-2"><span className="font-bold text-violet-600 shrink-0">1.</span> Download the CSV template below.</li>
-              <li className="flex gap-2"><span className="font-bold text-violet-600 shrink-0">2.</span> Fill in student data (one per row).</li>
+              <li className="flex gap-2"><span className="font-bold text-violet-600 shrink-0">2.</span> Fill in the data (one per row).</li>
               <li className="flex gap-2"><span className="font-bold text-violet-600 shrink-0">3.</span> Drag & drop or select the CSV file.</li>
               <li className="flex gap-2"><span className="font-bold text-violet-600 shrink-0">4.</span> Review the preview table.</li>
-              <li className="flex gap-2"><span className="font-bold text-violet-600 shrink-0">5.</span> Click <strong>Upload Students</strong>.</li>
+              <li className="flex gap-2"><span className="font-bold text-violet-600 shrink-0">5.</span> Click <strong>Upload Data</strong>.</li>
             </ol>
           </div>
 
           <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 p-5">
             <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-3">Required Columns</h3>
             <div className="space-y-1.5">
-              {[
-                { col: 'username', req: true, note: 'Unique login username' },
-                { col: 'password', req: true, note: 'Initial password' },
-                { col: 'name', req: true, note: 'Full name' },
-                { col: 'admissionNumber', req: true, note: 'Unique admission no.' },
-                { col: 'class', req: false, note: 'e.g. Class XI' },
-                { col: 'wing', req: false, note: 'Wing name' },
-                { col: 'dob', req: false, note: 'YYYY-MM-DD format' },
-                { col: 'phone', req: false, note: 'Mobile number' },
-                { col: 'email', req: false, note: 'Email address' }
-              ].map(f => (
+              {SAMPLES[entityType].cols.map(f => (
                 <div key={f.col} className="flex items-start gap-2 text-xs">
                   <span className={`shrink-0 px-1.5 py-0.5 rounded font-bold ${f.req ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-500'}`}>
                     {f.req ? 'REQ' : 'OPT'}
@@ -185,7 +234,7 @@ const BulkUpload = () => {
             <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden">
               <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
-                  Preview — {rows.length} student{rows.length !== 1 ? 's' : ''} ready
+                  Preview — {rows.length} records ready
                 </h3>
                 <button onClick={clearAll} className="flex items-center gap-1 text-xs text-rose-500 hover:text-rose-600">
                   <Trash2 size={12} /> Clear
@@ -224,7 +273,7 @@ const BulkUpload = () => {
               disabled={uploading || missingCols.length > 0}
               className="w-full flex items-center justify-center gap-2 py-4 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-sm shadow-lg transition-all"
             >
-              {uploading ? <><RefreshCw size={16} className="animate-spin" /> Uploading...</> : <><Upload size={16} /> Upload {rows.length} Student{rows.length !== 1 ? 's' : ''}</>}
+              {uploading ? <><RefreshCw size={16} className="animate-spin" /> Uploading...</> : <><Upload size={16} /> Upload {rows.length} Records</>}
             </button>
           )}
 

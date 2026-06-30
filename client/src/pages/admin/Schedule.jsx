@@ -242,7 +242,7 @@ const SchedulePage = () => {
             <form onSubmit={handleSubmit} className="space-y-4 text-sm">
               {/* Program Selector */}
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">Select Approved Program *</label>
+                <label className="form-label  ">Select Approved Program *</label>
                 <select
                   value={programId}
                   onChange={(e) => {
@@ -268,7 +268,7 @@ const SchedulePage = () => {
 
               {/* Date */}
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">Date *</label>
+                <label className="form-label  ">Date *</label>
                 <input
                   type="date"
                   value={date}
@@ -279,7 +279,7 @@ const SchedulePage = () => {
 
               {/* Time */}
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">Time Slot *</label>
+                <label className="form-label  ">Time Slot *</label>
                 <input
                   type="text"
                   value={time}
@@ -291,7 +291,7 @@ const SchedulePage = () => {
 
               {/* Venue */}
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">Venue *</label>
+                <label className="form-label  ">Venue *</label>
                 <input
                   type="text"
                   value={venue}
@@ -303,7 +303,7 @@ const SchedulePage = () => {
 
               {/* Description */}
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500">Scheduling Notes</label>
+                <label className="form-label  ">Scheduling Notes</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
