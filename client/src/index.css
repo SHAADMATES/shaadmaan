@@ -14,7 +14,7 @@
   }
   
   .form-submit-btn {
-    @apply w-full py-4 px-6 bg-gradient-to-r from-royal to-cyan text-white font-extrabold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-cyan/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal disabled:opacity-50 flex items-center justify-center group hover:-translate-y-0.5;
+    @apply w-full py-4 px-6 bg-gradient-to-r from-royal to-cyan text-white font-extrabold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-cyan/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal disabled:opacity-50 flex items-center justify-center hover:-translate-y-0.5;
   }
 }
 
