@@ -23,7 +23,8 @@ import {
   BookMarked,
   KeyRound,
   Globe,
-  X
+  X,
+  Upload
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -34,7 +35,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const superAdminLinks = [
     { to: '/super/dashboard', label: 'Super Dashboard', icon: LayoutDashboard },
     { to: '/super/users', label: 'Manage Users', icon: Users },
-    { to: '/super/bulk-upload', label: 'Bulk Upload', icon: TrendingUp },
+    { to: '/super/bulk-upload', label: 'Bulk Upload', icon: Upload },
     { to: '/super/backups', label: 'System Backups', icon: Database },
     { to: '/super/audit-logs', label: 'Audit Logs', icon: ShieldCheck },
   ];
@@ -42,6 +43,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const adminLinks = [
     { to: '/admin/dashboard', label: 'Admin Dashboard', icon: LayoutDashboard },
     { to: '/admin/students', label: 'Manage Students', icon: Users },
+    { to: '/admin/bulk-upload', label: 'Bulk Upload', icon: Upload },
     { to: '/admin/wings', label: 'Manage Wings', icon: UserSquare2 },
     { to: '/admin/users', label: 'User Directory', icon: UserCircle },
     { to: '/admin/forms', label: 'Forms Management', icon: FileSpreadsheet },

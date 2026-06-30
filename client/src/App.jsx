@@ -70,6 +70,7 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/super/dashboard" element={<SuperDashboard />} />
               <Route path="/super/users" element={<ManageUsers />} />
+              <Route path="/super/bulk-upload" element={<BulkUpload />} />
               <Route path="/super/backups" element={<Backups />} />
               <Route path="/super/audit-logs" element={<AuditLogs />} />
             </Route>
