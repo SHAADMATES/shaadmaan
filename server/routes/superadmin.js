@@ -60,7 +60,8 @@ router.get('/stats', async (req, res) => {
       inactiveUsers,
       usersByRole: usersByRole.map(r => ({ role: r.role, count: r._count._all })),
       totalIncome,
-      totalExpense
+      totalExpense,
+      financeHistory: finances
     });
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving system statistics.', error: error.message });

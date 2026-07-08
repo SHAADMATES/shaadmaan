@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Toast from '../../components/Toast';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const StatBadge = ({ label, value, icon: Icon, color, bg, border }) => (
   <div className={`p-5 rounded-2xl ${bg} border ${border} flex items-center justify-between group hover:-translate-y-0.5 transition-all`}>
@@ -211,17 +212,41 @@ const SuperDashboard = () => {
             </div>
           </div>
 
-          {/* Wing breakdown */}
-          {stats?.wingsData?.length > 0 && (
-            <div className="relative z-10">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Wing Activity</p>
-              <div className="space-y-2">
-                {stats.wingsData.map((w, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs py-2 border-b border-slate-100 dark:border-slate-800">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">{w._id}</span>
-                    <span className="font-mono text-slate-500">{w.programsCount} program{w.programsCount !== 1 ? 's' : ''}</span>
-                  </div>
-                ))}
+          {/* Finance Chart */}
+          {stats?.financeHistory?.length > 0 && (
+            <div className="relative z-10 mt-6 pt-4 border-t border-emerald-100 dark:border-emerald-900/30">
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-4">Ledger Trends</p>
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stats.financeHistory} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} vertical={false} />
+                    <XAxis 
+                      dataKey="date" 
+                      tickFormatter={(date) => new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      tick={{ fontSize: 10, fill: '#64748b' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 10, fill: '#64748b' }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(val) => `$${val}`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', fontSize: '12px' }}
+                      labelFormatter={(label) => new Date(label).toLocaleDateString()}
+                      formatter={(value, name, props) => [`$${value}`, props.payload.type === 'income' ? 'Income' : 'Expense']}
+                    />
+                    <Area type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorAmount)" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
           )}

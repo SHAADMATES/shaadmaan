@@ -66,6 +66,8 @@ model FormField {
   type      String
   required  Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  registrationAnswers RegistrationAnswer[]
 }
 
 model Group {
@@ -146,6 +148,18 @@ model Registration {
   groupId          String?
   group            Group?   @relation(fields: [groupId], references: [id])
   registrationDate DateTime @default(now())
+
+  answers          RegistrationAnswer[]
+}
+
+model RegistrationAnswer {
+  id             String       @id @default(uuid())
+  registrationId String
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  formFieldId    String
+  formField      FormField    @relation(fields: [formFieldId], references: [id], onDelete: Cascade)
+  value          String
+  createdAt      DateTime     @default(now())
 }
 
 model ReportLog {

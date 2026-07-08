@@ -21,21 +21,25 @@ router.get('/programs', async (req, res) => {
 // @desc    Search students for group team invites
 router.get('/search', async (req, res) => {
   const { query } = req.query;
-  if (!query) return res.json([]);
 
   try {
     const currentStudent = await prisma.student.findUnique({ where: { userId: req.user.id } });
     if (!currentStudent) return res.status(404).json({ message: 'Student profile not found.' });
 
+    const whereClause = {
+      id: { not: currentStudent.id }
+    };
+
+    if (query && query.trim() !== '') {
+      whereClause.OR = [
+        { name: { contains: query } },
+        { studentId: { contains: query } }
+      ];
+    }
+
     const matches = await prisma.student.findMany({
-      where: {
-        id: { not: currentStudent.id },
-        OR: [
-          { name: { contains: query } },
-          { studentId: { contains: query } }
-        ]
-      },
-      take: 10
+      where: whereClause,
+      take: query ? 10 : 50
     });
 
     res.json(matches);

@@ -15,6 +15,7 @@ const AvailablePrograms = () => {
 
   // Registration states
   const [regModalOpen, setRegModalOpen] = useState(false);
+  const [regStep, setRegStep] = useState(1);
   const [teamName, setTeamName] = useState('');
   const [invitedMembers, setInvitedMembers] = useState([]); // Array of Student objects
   
@@ -49,10 +50,7 @@ const AvailablePrograms = () => {
   // Search students for group invitations
   useEffect(() => {
     const searchInvitedStudents = async () => {
-      if (studentQuery.length < 2) {
-        setStudentMatches([]);
-        return;
-      }
+      // Always fetch, even if query is empty
       setSearchingStudents(true);
       try {
         const res = await api.get(`/student/search?query=${studentQuery}`);
@@ -70,14 +68,17 @@ const AvailablePrograms = () => {
     };
 
     const delayDebounce = setTimeout(() => {
-      searchInvitedStudents();
+      if (regModalOpen && selectedProgram?.type === 'group') {
+        searchInvitedStudents();
+      }
     }, 300);
 
     return () => clearTimeout(delayDebounce);
-  }, [studentQuery, invitedMembers]);
+  }, [studentQuery, invitedMembers, regModalOpen, selectedProgram]);
 
   const handleOpenRegister = () => {
     if (!selectedProgram) return;
+    setRegStep(1);
     setTeamName('');
     setInvitedMembers([]);
     setStudentQuery('');
@@ -87,6 +88,15 @@ const AvailablePrograms = () => {
   };
 
   const handleSelectStudent = (student) => {
+    if (selectedProgram && selectedProgram.maxParticipants > 0) {
+      if (invitedMembers.length >= selectedProgram.maxParticipants - 1) {
+        setErrorMsg(`Team size limit reached. Maximum ${selectedProgram.maxParticipants} participants allowed (including you).`);
+        setStudentQuery('');
+        setStudentMatches([]);
+        return;
+      }
+    }
+    setErrorMsg('');
     setInvitedMembers(prev => [...prev, student]);
     setStudentQuery('');
     setStudentMatches([]);
@@ -288,15 +298,24 @@ const AvailablePrograms = () => {
               {/* Rules */}
               <div className="space-y-1 text-xs">
                 <h4 className="font-semibold text-slate-400">Rules & Instructions</h4>
-                {selectedProgram.rules && selectedProgram.rules.length > 0 ? (
-                  <ul className="list-disc list-inside space-y-1 bg-slate-500/5 p-3 rounded-xl text-slate-600 dark:text-slate-300">
-                    {selectedProgram.rules.map((rule, index) => (
-                      <li key={index} className="leading-relaxed">{rule}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-slate-500 italic bg-slate-500/5 p-3 rounded-xl">No specific rules defined.</p>
-                )}
+                {(() => {
+                  let rulesArr = [];
+                  try {
+                    rulesArr = typeof selectedProgram.rules === 'string' ? JSON.parse(selectedProgram.rules) : selectedProgram.rules;
+                  } catch (e) {
+                    rulesArr = [];
+                  }
+                  
+                  return rulesArr && rulesArr.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-1 bg-slate-500/5 p-3 rounded-xl text-slate-600 dark:text-slate-300">
+                      {rulesArr.map((rule, index) => (
+                        <li key={index} className="leading-relaxed">{rule}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-slate-500 italic bg-slate-500/5 p-3 rounded-xl">No specific rules defined.</p>
+                  );
+                })()}
               </div>
 
               {/* Register Action */}
@@ -331,124 +350,194 @@ const AvailablePrograms = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-xs p-4">
           <div className="glass-card border rounded-3xl max-w-md w-full p-6 shadow-2xl animate-scale max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-              <h3 className="text-lg font-bold font-sans">
-                Event Registration Details
-              </h3>
-              <button onClick={() => setRegModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                <X size={18} />
+              <div className="flex flex-col">
+                <h3 className="text-lg font-bold font-sans">
+                  Event Registration
+                </h3>
+                {selectedProgram?.type === 'group' && (
+                  <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                    Step {regStep} of 2
+                  </p>
+                )}
+              </div>
+              <button onClick={() => setRegModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full">
+                <X size={16} />
               </button>
             </div>
 
             {errorMsg && (
-              <div className="p-3 mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center">
+              <div className="p-3 mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center animate-scale">
                 <AlertCircle size={14} className="mr-2 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
-            <form onSubmit={handleRegisterSubmit} className="space-y-4 text-sm">
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-850/50 text-xs space-y-1">
-                <p className="text-slate-400 font-medium">Program Title</p>
-                <p className="font-bold text-slate-800 dark:text-white text-sm">{selectedProgram?.title}</p>
-                <p className="text-slate-400 mt-1 font-medium">Type</p>
-                <p className="font-semibold uppercase text-royal">{selectedProgram?.type} program</p>
-              </div>
-
-              {/* Group Fields */}
-              {selectedProgram?.type === 'group' && (
-                <div className="space-y-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-                  {/* Team Name */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-500">Team Name *</label>
-                    <input
-                      type="text"
-                      value={teamName}
-                      onChange={(e) => setTeamName(e.target.value)}
-                      className="w-full px-3.5 py-2 border dark:border-slate-800 dark:bg-slate-900 rounded-xl"
-                      placeholder="e.g. Cyber Knights"
-                    />
+            <form onSubmit={handleRegisterSubmit} className="space-y-4 text-sm relative">
+              {/* STEP 1: Basic Details / Single Registration */}
+              {regStep === 1 && (
+                <div className="space-y-4 animate-scale">
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800/80 border border-slate-100 dark:border-slate-800 shadow-sm text-xs space-y-2">
+                    <div>
+                      <p className="text-slate-400 font-medium uppercase tracking-wider text-[10px]">Program Title</p>
+                      <p className="font-bold text-slate-800 dark:text-white text-sm">{selectedProgram?.title}</p>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-200/60 dark:border-slate-700/50">
+                      <div>
+                        <p className="text-slate-400 font-medium uppercase tracking-wider text-[10px]">Type</p>
+                        <p className="font-semibold uppercase text-royal">{selectedProgram?.type} program</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 font-medium uppercase tracking-wider text-[10px]">Date</p>
+                        <p className="font-semibold">{new Date(selectedProgram?.date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Team Members Invite Lookup */}
+                  {selectedProgram?.type === 'group' && (
+                    <div className="space-y-4 pt-2">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Choose a Team Name *</label>
+                        <input
+                          type="text"
+                          value={teamName}
+                          onChange={(e) => setTeamName(e.target.value)}
+                          className="w-full px-4 py-3 border dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-royal/50 outline-none transition-all shadow-sm"
+                          placeholder="e.g. Cyber Knights"
+                          required
+                        />
+                      </div>
+                      <p className="text-xs text-slate-400 italic">You will be designated as the Team Leader. You can invite members in the next step.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* STEP 2: Group Member Invites */}
+              {regStep === 2 && selectedProgram?.type === 'group' && (
+                <div className="space-y-4 animate-scale">
                   <div className="space-y-2 relative">
-                    <label className="text-xs font-semibold text-slate-500">Invite Members (Start typing fellow student name/ID...)</label>
-                    <input
-                      type="text"
-                      value={studentQuery}
-                      onChange={(e) => setStudentQuery(e.target.value)}
-                      className="w-full px-3.5 py-2 border dark:border-slate-800 dark:bg-slate-900 rounded-xl"
-                      placeholder="Search..."
-                    />
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Invite Team Members (Optional)</label>
+                    <div className="relative">
+                      <Search className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none mt-2.5" size={16} />
+                      <input
+                        type="text"
+                        value={studentQuery}
+                        onChange={(e) => setStudentQuery(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2.5 border dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-royal/50 outline-none shadow-sm"
+                        placeholder="Search by name or ID..."
+                      />
+                      {searchingStudents && (
+                        <div className="absolute right-3 top-[10px]">
+                          <div className="w-4 h-4 border-2 border-royal border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Lookup result list */}
                     {studentMatches.length > 0 && (
-                      <div className="absolute top-[68px] inset-x-0 bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-xl shadow-lg z-50 p-2 divide-y divide-slate-100 dark:divide-slate-800 max-h-48 overflow-y-auto">
+                      <div className="absolute top-[68px] inset-x-0 bg-white dark:bg-slate-900 border dark:border-slate-700 rounded-xl shadow-xl z-50 p-2 divide-y divide-slate-100 dark:divide-slate-800 max-h-48 overflow-y-auto">
                         {studentMatches.map(student => (
                           <div
                             key={student._id}
                             onClick={() => handleSelectStudent(student)}
-                            className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer text-xs font-semibold flex items-center justify-between rounded-lg"
+                            className="p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer text-xs font-semibold flex items-center justify-between rounded-lg transition-colors"
                           >
-                            <span>{student.name} ({student.studentId})</span>
+                            <span className="flex items-center">
+                              <span className="w-6 h-6 rounded-full bg-royal/10 text-royal flex items-center justify-center mr-2 text-[10px]">{student.name.charAt(0)}</span>
+                              {student.name} ({student.studentId})
+                            </span>
                             <span className="text-[10px] text-slate-400 font-normal uppercase">{student.wing}</span>
                           </div>
                         ))}
                       </div>
                     )}
-
-                    {searchingStudents && (
-                      <div className="absolute right-3 top-[34px]">
-                        <div className="w-4 h-4 border-2 border-slate-300 border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Invited list chips */}
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-semibold text-slate-400">Team Roster (Auto-includes you as Leader):</p>
-                    <div className="flex flex-wrap gap-1.5 p-2 bg-slate-500/5 rounded-2xl min-h-[50px]">
-                      <span className="px-2.5 py-1 text-xs font-semibold bg-royal/15 text-royal border border-royal/20 rounded-xl flex items-center">
-                        You (Leader)
-                      </span>
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs font-semibold text-slate-500">Team Roster</p>
+                      {selectedProgram?.maxParticipants > 0 && (
+                        <span className="text-[10px] font-bold text-royal bg-royal/10 px-2 py-0.5 rounded-full">
+                          Max Size: {selectedProgram.maxParticipants}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 min-h-[60px]">
+                      <div className="flex items-center justify-between p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700">
+                        <span className="text-xs font-semibold flex items-center text-slate-700 dark:text-slate-200">
+                          <Users size={14} className="mr-2 text-royal" />
+                          You (Leader)
+                        </span>
+                        <span className="text-[10px] uppercase font-bold text-royal bg-royal/10 px-2 py-0.5 rounded border border-royal/20">Leader</span>
+                      </div>
+                      
+                      {invitedMembers.length === 0 && (
+                        <p className="text-xs text-slate-400 italic p-2 text-center">No additional members invited yet.</p>
+                      )}
+
                       {invitedMembers.map(member => (
-                        <span 
+                        <div 
                           key={member._id} 
-                          className="px-2.5 py-1 text-xs font-semibold bg-slate-200 dark:bg-slate-800 rounded-xl flex items-center"
+                          className="flex items-center justify-between p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700 animate-scale"
                         >
-                          {member.name}
+                          <span className="text-xs font-semibold flex items-center text-slate-700 dark:text-slate-200">
+                            <User size={14} className="mr-2 text-slate-400" />
+                            {member.name}
+                          </span>
                           <button
                             type="button"
                             onClick={() => handleRemoveInvited(member._id)}
-                            className="ml-1.5 p-0.5 text-slate-400 hover:text-rose-500 rounded"
+                            className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded transition-colors"
                           >
-                            <X size={12} />
+                            <X size={14} />
                           </button>
-                        </span>
+                        </div>
                       ))}
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setRegModalOpen(false)}
-                  className="px-4 py-2 border dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loadingSubmit}
-                  className="px-6 py-2 bg-royal hover:bg-royal-dark text-white font-bold rounded-xl transition-all shadow glow-blue"
-                >
-                  {loadingSubmit ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    'Confirm Signup'
-                  )}
-                </button>
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
+                {regStep === 2 && selectedProgram?.type === 'group' && (
+                  <button
+                    type="button"
+                    onClick={() => setRegStep(1)}
+                    className="px-5 py-2.5 border dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold rounded-xl transition-colors text-xs"
+                  >
+                    Back
+                  </button>
+                )}
+                
+                {regStep === 1 && selectedProgram?.type === 'group' ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!teamName) setErrorMsg('Please choose a team name first.');
+                      else {
+                        setErrorMsg('');
+                        setRegStep(2);
+                      }
+                    }}
+                    className="px-6 py-2.5 bg-royal hover:bg-royal-dark text-white font-bold rounded-xl transition-all shadow glow-blue text-xs flex items-center"
+                  >
+                    Next Step <Check size={14} className="ml-1" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={loadingSubmit}
+                    className="px-6 py-2.5 bg-emerald hover:bg-emerald-dark text-white font-bold rounded-xl transition-all shadow glow-green text-xs flex items-center"
+                  >
+                    {loadingSubmit ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <>Confirm Signup <Check size={14} className="ml-1" /></>
+                    )}
+                  </button>
+                )}
               </div>
             </form>
           </div>

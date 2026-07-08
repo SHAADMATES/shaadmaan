@@ -127,6 +127,7 @@ const FormsManagement = () => {
                 <option value="wing">Wing Creation Form</option>
                 <option value="program">Program Proposal Form</option>
                 <option value="transaction">Ledger Transaction Form</option>
+                <option value="registration">Event Registration Form</option>
               </select>
             </div>
 
