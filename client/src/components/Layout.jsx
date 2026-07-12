@@ -3,6 +3,7 @@ import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import CommandModal from './CommandModal';
 
 const Layout = () => {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-navy-dark transition-colors duration-300">
+      <CommandModal />
       {/* Sidebar navigation */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 

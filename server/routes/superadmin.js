@@ -24,23 +24,32 @@ try {
 // @desc    Get system-wide statistics
 router.get('/stats', async (req, res) => {
   try {
-    const totalUsers = await prisma.user.count();
-    const totalStudents = await prisma.student.count();
-    const totalWingManagers = await prisma.wingChairman.count();
-    const totalPrograms = await prisma.program.count();
-    const totalOutreach = await prisma.outreach.count();
-    const totalCertificates = await prisma.certificate.count();
-    const totalAuditLogs = await prisma.auditLog.count();
-    
-    const usersByRole = await prisma.user.groupBy({
-      by: ['role'],
-      _count: { _all: true }
-    });
+    const [
+      totalUsers,
+      totalStudents,
+      totalWingManagers,
+      totalPrograms,
+      totalOutreach,
+      totalCertificates,
+      totalAuditLogs,
+      usersByRole,
+      activeUsers,
+      inactiveUsers,
+      finances
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.student.count(),
+      prisma.wingChairman.count(),
+      prisma.program.count(),
+      prisma.outreach.count(),
+      prisma.certificate.count(),
+      prisma.auditLog.count(),
+      prisma.user.groupBy({ by: ['role'], _count: { _all: true } }),
+      prisma.user.count({ where: { isActive: true } }),
+      prisma.user.count({ where: { isActive: false } }),
+      prisma.finance.findMany()
+    ]);
 
-    const activeUsers = await prisma.user.count({ where: { isActive: true } });
-    const inactiveUsers = await prisma.user.count({ where: { isActive: false } });
-
-    const finances = await prisma.finance.findMany();
     let totalIncome = 0;
     let totalExpense = 0;
     finances.forEach(f => {
@@ -425,6 +434,20 @@ router.put('/users/:id/role', async (req, res) => {
     res.json({ message: `Role changed to ${role} successfully.`, user: updated });
   } catch (error) {
     res.status(500).json({ message: 'Role change failed.', error: error.message });
+  }
+});
+
+// @route   GET /api/superadmin/live-activity
+// @desc    Get recent 15 audit logs for real-time dashboard ticker
+router.get('/live-activity', async (req, res) => {
+  try {
+    const logs = await prisma.auditLog.findMany({
+      orderBy: { timestamp: 'desc' },
+      take: 15
+    });
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch live activity logs', error: error.message });
   }
 });
 

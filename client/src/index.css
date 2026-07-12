@@ -132,6 +132,123 @@
   animation: shimmer 1.5s infinite;
 }
 
+/* Next-Gen Glass Card & Stat Badge Aesthetics */
+.glass-card-hover {
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+}
+
+.stat-badge-glow {
+  position: relative;
+  overflow: hidden;
+}
+.stat-badge-glow::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.6), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.stat-badge-glow:hover::before {
+  opacity: 1;
+}
+
+.hover-glow-emerald:hover {
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.15), 0 8px 10px -6px rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.hover-glow-blue:hover {
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15), 0 8px 10px -6px rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.hover-glow-purple:hover {
+  box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.15), 0 8px 10px -6px rgba(168, 85, 247, 0.1);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.hover-glow-amber:hover {
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.15), 0 8px 10px -6px rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+/* Premium Universal Form UI & Input Styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="tel"],
+input[type="url"],
+select,
+textarea {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-radius: 0.75rem !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="number"]:hover,
+input[type="date"]:hover,
+input[type="time"]:hover,
+input[type="tel"]:hover,
+input[type="url"]:hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(67, 97, 238, 0.45) !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: #4361EE !important;
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25), 0 4px 15px -3px rgba(67, 97, 238, 0.18) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Custom Checkbox & Radio Polish */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #4361EE !important;
+  transition: transform 0.15s ease !important;
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  transform: scale(1.1) !important;
+}
+
+/* Form Label Enhancement */
+label {
+  font-weight: 600 !important;
+  letter-spacing: 0.015em !important;
+  transition: color 0.2s ease !important;
+}
+
+/* Form Action Buttons & Modals Polish */
+.modal-backdrop {
+  backdrop-filter: blur(12px) !important;
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 /* Global Print Styles */
 @media print {
@@ -141,7 +258,7 @@
   }
 
   /* Reset backgrounds and shadows for clean printing */
-  body, main, .glass-card, .bg-slate-50, .dark\\:bg-slate-900, .bg-gradient-to-br {
+  body, main, .glass-card, .bg-slate-50, .dark\:bg-slate-900, .bg-gradient-to-br {
     background: white !important;
     box-shadow: none !important;
     border: none !important;

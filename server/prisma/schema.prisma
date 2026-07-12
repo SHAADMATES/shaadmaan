@@ -164,8 +164,11 @@ model RegistrationAnswer {
 
 model ReportLog {
   id          String   @id @default(uuid())
-  title       String
+  title       String   @default("")
   type        String
+  programId   String?  @default("")
+  wing        String?  @default("")
+  details     String?  @default("")
   generatedAt DateTime @default(now())
 }
 

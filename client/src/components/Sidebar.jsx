@@ -24,7 +24,10 @@ import {
   KeyRound,
   Globe,
   X,
-  Upload
+  Upload,
+  BarChart2,
+  Activity,
+  Bell
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -36,6 +39,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: '/super/dashboard', label: 'Super Dashboard', icon: LayoutDashboard },
     { to: '/super/users', label: 'Manage Users', icon: Users },
     { to: '/super/bulk-upload', label: 'Bulk Upload', icon: Upload },
+    { to: '/super/export-center', label: 'Universal Export Hub', icon: FileSpreadsheet },
+    { to: '/super/reports', label: 'Executive Reports', icon: BarChart2 },
+    { to: '/super/health', label: 'System Health Diagnostics', icon: Activity },
+    { to: '/super/announcements', label: 'Announcements Hub', icon: Bell },
     { to: '/super/backups', label: 'System Backups', icon: Database },
     { to: '/super/audit-logs', label: 'Audit Logs', icon: ShieldCheck },
   ];
@@ -53,6 +60,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: '/admin/results', label: 'Add Results', icon: Trophy },
     { to: '/admin/certificates', label: 'Manage Certificates', icon: Award },
     { to: '/admin/reports', label: 'Reports', icon: FileSpreadsheet },
+    { to: '/admin/announcements', label: 'Announcements', icon: Bell },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 
@@ -63,6 +71,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: '/chairman/students', label: 'Registered Students', icon: Users },
     { to: '/chairman/schedule', label: 'Schedules', icon: Calendar },
     { to: '/chairman/results', label: 'Results', icon: Trophy },
+    { to: '/chairman/announcements', label: 'Announcements', icon: Bell },
   ];
 
   const treasurerLinks = [
@@ -78,6 +87,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: '/student/schedule', label: 'Timeline Schedule', icon: Calendar },
     { to: '/student/my-results', label: 'My Results', icon: Trophy },
     { to: '/student/certificates', label: 'My Certificates', icon: Award },
+    { to: '/student/announcements', label: 'Announcements', icon: Bell },
     { to: '/student/profile', label: 'Profile Settings', icon: UserCircle },
   ];
 

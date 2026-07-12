@@ -11,6 +11,7 @@ import treasurerRouter from './routes/treasurer.js';
 import studentRouter from './routes/student.js';
 import resultsRouter from './routes/results.js';
 import searchRouter from './routes/search.js';
+import announcementRouter from './routes/announcement.js';
 
 // Load env vars
 dotenv.config();
@@ -22,28 +23,39 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
 
-// Prisma to Mongoose compatibility middleware (injects _id)
+// Prisma to Mongoose compatibility middleware (injects _id fast without heavy JSON deep cloning)
 app.use((req, res, next) => {
   const originalJson = res.json;
   res.json = function (obj) {
-    const addUnderscoreId = (data) => {
-      if (Array.isArray(data)) return data.map(addUnderscoreId);
-      if (data !== null && typeof data === 'object') {
-        if (data.id && !data._id) data._id = data.id;
-        for (let key in data) {
-          if (Array.isArray(data[key]) || (data[key] !== null && typeof data[key] === 'object')) {
-            data[key] = addUnderscoreId(data[key]);
+    const addUnderscoreIdFast = (data, depth = 0) => {
+      if (depth > 6 || !data || typeof data !== 'object') return data;
+      if (Array.isArray(data)) {
+        for (let i = 0; i < data.length; i++) {
+          if (data[i] && typeof data[i] === 'object') {
+            data[i] = addUnderscoreIdFast(data[i], depth + 1);
           }
+        }
+        return data;
+      }
+      if (data.id && !data._id) {
+        try {
+          data._id = data.id;
+        } catch (err) {
+          data = { ...data, _id: data.id };
+        }
+      }
+      for (const key in data) {
+        if (data[key] && typeof data[key] === 'object' && !(data[key] instanceof Date)) {
+          data[key] = addUnderscoreIdFast(data[key], depth + 1);
         }
       }
       return data;
     };
     
-    // Deep clone and process only if it's an object/array
     let processedObj = obj;
     if (obj !== null && typeof obj === 'object') {
       try {
-        processedObj = addUnderscoreId(JSON.parse(JSON.stringify(obj)));
+        processedObj = addUnderscoreIdFast(obj);
       } catch (e) {
         processedObj = obj;
       }
@@ -63,6 +75,7 @@ app.use('/api/treasurer', treasurerRouter);
 app.use('/api/student', studentRouter);
 app.use('/api/results', resultsRouter);
 app.use('/api/search', searchRouter);
+app.use('/api/announcements', announcementRouter);
 
 // Fallback Route
 app.use((req, res) => {

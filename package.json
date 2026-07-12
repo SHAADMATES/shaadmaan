@@ -1,4 +1,12 @@
 {
+  "name": "shaad-mates-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server/server.js",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1"
   }

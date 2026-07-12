@@ -18,16 +18,18 @@ import {
   DollarSign
 } from 'lucide-react';
 import Toast from '../../components/Toast';
+import AnnouncementsHub from '../../components/AnnouncementsHub';
+import LiveActivityFeed from '../../components/LiveActivityFeed';
 
 const StatCard = ({ title, value, icon: Icon, gradient, accent, change }) => (
-  <div className={`relative p-6 rounded-3xl overflow-hidden border group hover:-translate-y-1 transition-all duration-300 cursor-default glass-card`}>
+  <div className={`stat-badge-glow relative p-6 rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/80 group hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 cursor-default glass-card-hover backdrop-blur-md`}>
     {/* Background glow */}
     <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${gradient} blur-2xl scale-150`} />
     
-    <div className="relative flex items-start justify-between">
+    <div className="relative flex items-start justify-between z-10">
       <div className="space-y-1">
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{title}</span>
-        <p className="text-4xl font-extrabold tracking-tight font-sans text-slate-900 dark:text-white mt-2">{value}</p>
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">{title}</span>
+        <p className="text-4xl font-black tracking-tight font-sans text-slate-900 dark:text-white mt-2">{value}</p>
         {change !== undefined && (
           <div className="flex items-center space-x-1 mt-1">
             <ArrowUpRight size={12} className={`${change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`} />
@@ -37,7 +39,7 @@ const StatCard = ({ title, value, icon: Icon, gradient, accent, change }) => (
           </div>
         )}
       </div>
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${accent}`}>
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${accent} group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300`}>
         <Icon size={26} className="text-white" />
       </div>
     </div>
@@ -175,6 +177,12 @@ const Dashboard = () => {
         {cards.map((card, idx) => (
           <StatCard key={idx} {...card} />
         ))}
+      </div>
+
+      {/* ── Real-Time Bulletin & Live Activity Ticker ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-6">
+        <AnnouncementsHub />
+        <LiveActivityFeed />
       </div>
 
       {/* Detail Section */}

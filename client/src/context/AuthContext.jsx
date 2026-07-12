@@ -13,6 +13,13 @@ export const api = axios.create({
   },
 });
 
+// Global high-speed in-memory cache engine (60s TTL)
+const _apiCache = new Map();
+const CACHE_TTL_MS = 60000;
+
+// Export helper to allow clearing cache manually or from SystemHealth
+export const clearApiCache = () => _apiCache.clear();
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profileDetails, setProfileDetails] = useState(null);
@@ -20,23 +27,65 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(localStorage.getItem('theme') === 'dark');
 
-  // Configure axios interceptor for auth token
+  // Configure axios interceptors for auth token, GET caching, and auto-invalidation
   useEffect(() => {
     const requestInterceptor = api.interceptors.request.use(
-      (config) => {
+      async (config) => {
         const activeToken = localStorage.getItem('token');
         if (activeToken) {
           config.headers['Authorization'] = `Bearer ${activeToken}`;
         }
+
+        // Check if GET request exists in hot cache
+        if (config.method?.toLowerCase() === 'get' && !config.params?._noCache) {
+          const cacheKey = `${config.url}_${JSON.stringify(config.params || {})}_${activeToken}`;
+          const cached = _apiCache.get(cacheKey);
+          if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+            // Return synthetic adapter to serve directly from RAM (<2ms)
+            config.adapter = () => Promise.resolve({
+              data: cached.data,
+              status: 200,
+              statusText: 'OK (Cached)',
+              headers: cached.headers || {},
+              config,
+              request: {}
+            });
+          }
+        } else if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase())) {
+          // Mutating request: invalidate relevant namespace entries in cache
+          const urlPrefix = config.url?.split('/')[1] || '';
+          for (const key of _apiCache.keys()) {
+            if (key.includes(urlPrefix) || key.includes('/stats') || key.includes('/dashboard')) {
+              _apiCache.delete(key);
+            }
+          }
+        }
+
         return config;
       },
-      (error) => {
-        return Promise.reject(error);
-      }
+      (error) => Promise.reject(error)
+    );
+
+    const responseInterceptor = api.interceptors.response.use(
+      (response) => {
+        const config = response.config;
+        if (config.method?.toLowerCase() === 'get' && response.status === 200) {
+          const activeToken = localStorage.getItem('token');
+          const cacheKey = `${config.url}_${JSON.stringify(config.params || {})}_${activeToken}`;
+          _apiCache.set(cacheKey, {
+            data: response.data,
+            headers: response.headers,
+            timestamp: Date.now()
+          });
+        }
+        return response;
+      },
+      (error) => Promise.reject(error)
     );
 
     return () => {
       api.interceptors.request.eject(requestInterceptor);
+      api.interceptors.response.eject(responseInterceptor);
     };
   }, []);
 

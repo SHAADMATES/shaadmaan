@@ -99,16 +99,17 @@ router.get('/stats', async (req, res) => {
     const wingProgramIds = wingPrograms.map(p => p.id);
 
     const totalPrograms = wingPrograms.length;
-    const totalParticipants = await prisma.registration.count({ where: { programId: { in: wingProgramIds } } });
-    
-    const results = await prisma.result.findMany({
-      where: { programId: { in: wingProgramIds } },
-      include: { winners: true }
-    });
+    const [totalParticipants, results] = await Promise.all([
+      prisma.registration.count({ where: { programId: { in: wingProgramIds } } }),
+      prisma.result.findMany({
+        where: { programId: { in: wingProgramIds } },
+        include: { winners: true }
+      })
+    ]);
     
     let totalWinners = 0;
     results.forEach(r => {
-      totalWinners += r.winners.length;
+      totalWinners += (r.winners?.length || 0);
     });
 
     res.json({

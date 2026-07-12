@@ -14,22 +14,29 @@ router.use(protect, authorize('admin', 'super_admin'));
 // @desc    Retrieve ERP analytics and metrics
 router.get('/stats', async (req, res) => {
   try {
-    const totalStudents = await prisma.student.count();
-    const totalWingManagers = await prisma.wingChairman.count();
-    const totalPrograms = await prisma.program.count();
-    const totalRegistrations = await prisma.registration.count();
-    const completedPrograms = await prisma.program.count({
-      where: { status: { in: ['Completed', 'Result Published'] } }
-    });
-    const resultsPublished = await prisma.result.count();
-    const outreachCount = await prisma.outreach.count();
-    const certificatesIssued = await prisma.certificate.count();
-    
-    // Group programs by wing and count
-    const wingsGroup = await prisma.program.groupBy({
-      by: ['wing'],
-      _count: { _all: true }
-    });
+    const [
+      totalStudents,
+      totalWingManagers,
+      totalPrograms,
+      totalRegistrations,
+      completedPrograms,
+      resultsPublished,
+      outreachCount,
+      certificatesIssued,
+      wingsGroup,
+      finances
+    ] = await Promise.all([
+      prisma.student.count(),
+      prisma.wingChairman.count(),
+      prisma.program.count(),
+      prisma.registration.count(),
+      prisma.program.count({ where: { status: { in: ['Completed', 'Result Published'] } } }),
+      prisma.result.count(),
+      prisma.outreach.count(),
+      prisma.certificate.count(),
+      prisma.program.groupBy({ by: ['wing'], _count: { _all: true } }),
+      prisma.finance.findMany()
+    ]);
     
     const wingsData = wingsGroup.map(w => ({
       _id: w.wing,
@@ -37,7 +44,6 @@ router.get('/stats', async (req, res) => {
     }));
 
     // Finance Metrics
-    const finances = await prisma.finance.findMany();
     let totalIncome = 0;
     let totalExpense = 0;
     finances.forEach(f => {
@@ -756,6 +762,64 @@ router.delete('/programs/:id', async (req, res) => {
   }
 });
 
+// --- RESULTS FOR REPORTS ---
+router.get('/results', async (req, res) => {
+  try {
+    const results = await prisma.result.findMany({
+      include: {
+        program: { select: { title: true, wing: true, date: true } },
+        winners: {
+          include: {
+            student: { select: { name: true, studentId: true, className: true, wing: true } },
+            group: { select: { name: true } }
+          }
+        }
+      },
+      orderBy: { publishedAt: 'desc' }
+    });
+    
+    // Flatten winners for tabular report display
+    const flattened = [];
+    results.forEach(r => {
+      if (r.winners && r.winners.length > 0) {
+        r.winners.forEach(w => {
+          flattened.push({
+            id: `${r.id}_${w.id}`,
+            _id: `${r.id}_${w.id}`,
+            programTitle: r.program?.title || 'Program Result',
+            wing: r.program?.wing || w.student?.wing || 'General',
+            date: r.program?.date || r.publishedAt,
+            position: w.position,
+            studentName: w.student?.name || w.group?.name || 'Group/Student',
+            studentId: w.student?.studentId || '-',
+            className: w.student?.className || '-',
+            marks: w.marks,
+            points: w.points,
+            grade: w.grade
+          });
+        });
+      } else {
+        flattened.push({
+          id: r.id,
+          _id: r.id,
+          programTitle: r.program?.title || 'Program Result',
+          wing: r.program?.wing || 'General',
+          date: r.program?.date || r.publishedAt,
+          position: '-',
+          studentName: 'No winners logged',
+          marks: 0,
+          points: 0
+        });
+      }
+    });
+
+    res.json(flattened);
+  } catch (error) {
+    console.error('Error loading results report:', error);
+    res.status(500).json({ message: 'Error loading results.' });
+  }
+});
+
 // --- SCHEDULES ---
 router.get('/schedules', async (req, res) => {
   try {
@@ -1111,6 +1175,20 @@ router.put('/certificates/:id/approve', async (req, res) => {
     res.json(updatedCert);
   } catch (error) {
     res.status(500).json({ message: 'Failed to update certificate approval.', error: error.message });
+  }
+});
+
+// @route   GET /api/admin/live-activity
+// @desc    Get recent 15 audit logs for real-time dashboard ticker
+router.get('/live-activity', async (req, res) => {
+  try {
+    const logs = await prisma.auditLog.findMany({
+      orderBy: { timestamp: 'desc' },
+      take: 15
+    });
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch live activity logs', error: error.message });
   }
 });
 

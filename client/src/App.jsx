@@ -16,6 +16,10 @@ import SuperDashboard from './pages/superadmin/Dashboard';
 import ManageUsers from './pages/superadmin/ManageUsers';
 import Backups from './pages/superadmin/Backups';
 import AuditLogs from './pages/superadmin/AuditLogs';
+import UniversalExportHub from './pages/superadmin/UniversalExportHub';
+import ReportsStudio from './pages/superadmin/ReportsStudio';
+import SystemHealth from './pages/superadmin/SystemHealth';
+import AnnouncementsHub from './components/AnnouncementsHub';
 
 // Treasurer Pages
 import TreasurerDashboard from './pages/treasurer/Dashboard';
@@ -71,6 +75,10 @@ function App() {
               <Route path="/super/dashboard" element={<SuperDashboard />} />
               <Route path="/super/users" element={<ManageUsers />} />
               <Route path="/super/bulk-upload" element={<BulkUpload />} />
+              <Route path="/super/export-center" element={<UniversalExportHub />} />
+              <Route path="/super/reports" element={<ReportsStudio />} />
+              <Route path="/super/health" element={<SystemHealth />} />
+              <Route path="/super/announcements" element={<AnnouncementsHub role="superadmin" />} />
               <Route path="/super/backups" element={<Backups />} />
               <Route path="/super/audit-logs" element={<AuditLogs />} />
             </Route>
@@ -101,6 +109,7 @@ function App() {
               <Route path="/admin/certificates" element={<ManageCertificates />} />
               <Route path="/admin/reports" element={<Reports />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/announcements" element={<AnnouncementsHub role="admin" />} />
             </Route>
           </Route>
 
@@ -113,6 +122,7 @@ function App() {
               <Route path="/chairman/students" element={<RegisteredStudents />} />
               <Route path="/chairman/schedule" element={<ManagerSchedule />} />
               <Route path="/chairman/results" element={<ManagerResults />} />
+              <Route path="/chairman/announcements" element={<AnnouncementsHub role="wing_chairman" />} />
             </Route>
           </Route>
 
@@ -129,6 +139,7 @@ function App() {
               <Route path="/student/my-results" element={<StudentResults />} />
               <Route path="/student/certificates" element={<StudentCertificates />} />
               <Route path="/student/profile" element={<StudentProfile />} />
+              <Route path="/student/announcements" element={<AnnouncementsHub role="student" />} />
             </Route>
           </Route>
 

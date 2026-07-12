@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
-import { Award, CheckCircle, XCircle, Search, RefreshCw, Eye, Sparkles, Filter } from 'lucide-react';
+import { Award, CheckCircle, XCircle, Search, RefreshCw, Eye, Sparkles, Filter, Download, Printer, X, QrCode, FileText } from 'lucide-react';
 import Toast from '../../components/Toast';
 
 const ManageCertificates = () => {
@@ -8,17 +8,25 @@ const ManageCertificates = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'approved', 'pending'
+  const [selectedCert, setSelectedCert] = useState(null);
+  const [signatureUrl, setSignatureUrl] = useState('');
+  const [downloading, setDownloading] = useState(false);
 
   // Toast
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
-  const fetchCertificates = async () => {
+  const fetchCertificatesAndSettings = async () => {
     setLoading(true);
     try {
       const res = await api.get('/admin/certificates');
       setCertificates(res.data);
+
+      const settingsRes = await api.get('/results/settings');
+      if (settingsRes.data && settingsRes.data.signatureUrl) {
+        setSignatureUrl(settingsRes.data.signatureUrl);
+      }
     } catch (err) {
       setToastType('error');
       setToastMessage('Failed to load certificates registry.');
@@ -28,7 +36,7 @@ const ManageCertificates = () => {
   };
 
   useEffect(() => {
-    fetchCertificates();
+    fetchCertificatesAndSettings();
   }, []);
 
   const handleToggleApproval = async (certId, currentStatus) => {
@@ -37,7 +45,6 @@ const ManageCertificates = () => {
       const newStatus = !currentStatus;
       await api.put(`/admin/certificates/${certId}/approve`, { approved: newStatus });
       
-      // Update local state
       setCertificates(prev => prev.map(c => c._id === certId ? { ...c, approved: newStatus } : c));
       
       setToastType('success');
@@ -47,6 +54,66 @@ const ManageCertificates = () => {
       setToastMessage('Failed to update certificate approval.');
     } finally {
       setActionLoadingId(null);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('certificate-print-area');
+    if (!element) return;
+
+    setDownloading(true);
+    setToastType('info');
+    setToastMessage('Rendering high-resolution A4 PDF... Please wait.');
+
+    try {
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+
+      const canvas = await html2canvas(element, {
+        scale: 3.0,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const canvasRatio = canvas.width / canvas.height;
+      const pdfRatio = pdfWidth / pdfHeight;
+      
+      let finalWidth = pdfWidth;
+      let finalHeight = pdfHeight;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (canvasRatio > pdfRatio) {
+        finalHeight = pdfWidth / canvasRatio;
+        offsetY = (pdfHeight - finalHeight) / 2;
+      } else {
+        finalWidth = pdfHeight * canvasRatio;
+        offsetX = (pdfWidth - finalWidth) / 2;
+      }
+
+      pdf.addImage(imgData, 'PNG', offsetX, offsetY, finalWidth, finalHeight);
+      pdf.save(`ShaadMates-Certificate-${selectedCert?.certificateId || 'credential'}.pdf`);
+
+      setToastType('success');
+      setToastMessage('Certificate PDF downloaded successfully!');
+    } catch (error) {
+      console.error('PDF Generation Error:', error);
+      setToastType('error');
+      setToastMessage('Failed to generate certificate PDF.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -72,13 +139,13 @@ const ManageCertificates = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
         <div className="relative z-10 space-y-2">
           <span className="flex items-center space-x-1.5 text-xs font-semibold uppercase tracking-wider bg-white/10 w-fit px-3 py-1 rounded-full border border-white/10">
-            <Sparkles size={12} className="text-gold animate-pulse" /> <span>Registry Control</span>
+            <Sparkles size={12} className="text-amber-300 animate-pulse" /> <span>Registry Control</span>
           </span>
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight font-sans">
-            Certificate Release Moderation
+            Certificate Release Moderation & PDF Studio
           </h2>
           <p className="text-xs md:text-sm text-slate-200/90 max-w-2xl font-light">
-            Authorize or hold academic merit certificates generated from program results. Students can download verified certificates as PDFs only after your explicit approval.
+            Authorize or hold academic merit certificates generated from program results. Preview exact vector/high-DPI layouts and download official verified PDFs directly from the admin panel.
           </p>
         </div>
       </div>
@@ -111,7 +178,7 @@ const ManageCertificates = () => {
           </div>
 
           <button
-            onClick={fetchCertificates}
+            onClick={fetchCertificatesAndSettings}
             className="p-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 rounded-xl transition-all"
             title="Refresh registry"
           >
@@ -164,7 +231,7 @@ const ManageCertificates = () => {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-amber-500/10 text-gold-dark border border-gold/10">
+                      <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
                         {cert.position} ({cert.grade || 'A'})
                       </span>
                     </td>
@@ -183,23 +250,32 @@ const ManageCertificates = () => {
                       )}
                     </td>
                     <td className="p-4 text-center">
-                      <button
-                        onClick={() => handleToggleApproval(cert._id, cert.approved)}
-                        disabled={actionLoadingId === cert._id}
-                        className={`px-4 py-1.5 rounded-xl font-bold text-xs transition-all ${
-                          cert.approved 
-                            ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-500' 
-                            : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600'
-                        }`}
-                      >
-                        {actionLoadingId === cert._id ? (
-                          <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto"></div>
-                        ) : cert.approved ? (
-                          'Revoke Release'
-                        ) : (
-                          'Approve Release'
-                        )}
-                      </button>
+                      <div className="flex items-center justify-center space-x-2">
+                        <button
+                          onClick={() => setSelectedCert(cert)}
+                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all"
+                          title="Preview & Download PDF"
+                        >
+                          <Eye size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleToggleApproval(cert._id, cert.approved)}
+                          disabled={actionLoadingId === cert._id}
+                          className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                            cert.approved 
+                              ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-500' 
+                              : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600'
+                          }`}
+                        >
+                          {actionLoadingId === cert._id ? (
+                            <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto"></div>
+                          ) : cert.approved ? (
+                            'Revoke'
+                          ) : (
+                            'Approve'
+                          )}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -208,6 +284,141 @@ const ManageCertificates = () => {
           </div>
         )}
       </div>
+
+      {/* Elegant Preview & High-Res PDF Download Modal */}
+      {selectedCert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto print:static print:bg-white print:p-0 print:m-0 print:block">
+          <div className="relative w-full max-w-4xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden print:border-none print:shadow-none print:w-full print:max-w-none my-8">
+            <button
+              onClick={() => setSelectedCert(null)}
+              className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-slate-900/10 hover:bg-slate-900/20 text-slate-700 transition-all print:hidden"
+            >
+              <X size={20} />
+            </button>
+
+            <div 
+              id="certificate-print-area" 
+              className="relative p-10 md:p-14 text-center overflow-hidden bg-white text-slate-900 font-sans border-[16px] border-double border-amber-600/90 m-4 shadow-inner"
+              style={{ minHeight: '620px' }}
+            >
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.04]">
+                <span className="text-8xl md:text-9xl font-serif font-black tracking-widest text-slate-900 -rotate-12">
+                  EXCELLENCE
+                </span>
+              </div>
+
+              <div className="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 border-amber-600/80" />
+              <div className="absolute top-4 right-4 w-12 h-12 border-t-4 border-r-4 border-amber-600/80" />
+              <div className="absolute bottom-4 left-4 w-12 h-12 border-b-4 border-l-4 border-amber-600/80" />
+              <div className="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 border-amber-600/80" />
+
+              <div className="relative z-10 flex flex-col items-center justify-center space-y-1 mb-6">
+                <div className="flex items-center space-x-2.5">
+                  <span className="text-4xl">🎓</span>
+                  <span className="text-2xl md:text-3xl font-black font-serif tracking-widest text-slate-900 uppercase">
+                    {localStorage.getItem('orgName') || 'SHAAD-MATES ACADEMY'}
+                  </span>
+                </div>
+                <p className="text-[11px] uppercase tracking-[0.3em] font-extrabold text-amber-700">
+                  Official Academic Merit & Excellence Credential
+                </p>
+              </div>
+
+              <div className="relative z-10 space-y-2 mb-8">
+                <h1 className="text-4xl md:text-6xl font-black tracking-tight font-serif text-slate-900 uppercase">
+                  Certificate of Merit
+                </h1>
+                <div className="w-48 h-1 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mt-2" />
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500 font-bold pt-2">
+                  THIS IS TO CERTIFY WITH DISTINCTION THAT
+                </p>
+              </div>
+
+              <div className="relative z-10 py-3 max-w-2xl mx-auto mb-6">
+                <p className="text-3xl md:text-5xl font-extrabold text-slate-900 font-serif italic border-b-2 border-slate-300 pb-3 inline-block px-8">
+                  {selectedCert.studentId?.name || 'Authorized Member'}
+                </p>
+              </div>
+
+              <div className="relative z-10 max-w-2xl mx-auto space-y-3 text-slate-700 text-sm md:text-base leading-relaxed mb-10">
+                <p>
+                  has demonstrated outstanding performance and achieved <strong className="text-amber-700 font-black text-lg underline decoration-amber-500/50">{selectedCert.position} Place Standing</strong> in the competitive event
+                </p>
+                <p className="font-black text-xl md:text-2xl text-slate-900 uppercase tracking-wide">
+                  "{selectedCert.programId?.title || 'Program Event'}"
+                </p>
+                <p className="text-xs text-slate-500">
+                  Conducted under the auspices of the <strong className="text-slate-800">{selectedCert.programId?.wing || 'Department'} Wing</strong> on {selectedCert.programId?.date ? new Date(selectedCert.programId.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Academic Session'}.
+                </p>
+              </div>
+
+              {selectedCert.grade && (
+                <div className="relative z-10 inline-block px-5 py-2 rounded-full bg-slate-900 text-amber-300 font-extrabold text-xs uppercase tracking-widest shadow-lg mb-8">
+                  Award Classification: Grade {selectedCert.grade}
+                </div>
+              )}
+
+              <div className="relative z-10 grid grid-cols-3 gap-6 pt-6 max-w-3xl mx-auto items-end border-t border-slate-200">
+                <div className="flex flex-col items-center justify-end">
+                  {signatureUrl ? (
+                    <img src={signatureUrl} alt="Signature" className="max-h-12 object-contain mix-blend-multiply mb-1" />
+                  ) : (
+                    <div className="h-10 font-serif text-slate-800 italic text-sm flex items-end justify-center mb-1 font-bold">
+                      Dr. Faisal Rahman
+                    </div>
+                  )}
+                  <div className="w-full border-b border-slate-400" />
+                  <p className="text-[10px] text-slate-600 uppercase tracking-widest font-extrabold mt-1.5">Principal / Chairman Signatory</p>
+                </div>
+
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 p-1 shadow-xl flex items-center justify-center text-white border-2 border-amber-300">
+                    <div className="w-full h-full rounded-full border border-amber-200/40 flex flex-col items-center justify-center p-1 text-center">
+                      <Sparkles size={14} className="mb-0.5" />
+                      <span className="text-[7px] font-black uppercase tracking-tighter leading-tight">OFFICIAL GOLD SEAL</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-end text-right">
+                  <div className="flex items-center space-x-2 mb-1 justify-center w-full">
+                    <QrCode size={24} className="text-slate-800" />
+                    <div className="text-left font-mono text-[9px] text-slate-700 font-bold leading-tight">
+                      <p>VERIFICATION ID:</p>
+                      <p className="text-amber-700">{selectedCert.certificateId || 'VER-SM-2026-0001'}</p>
+                    </div>
+                  </div>
+                  <div className="w-full border-b border-slate-400" />
+                  <p className="text-[10px] text-slate-600 uppercase tracking-widest font-extrabold mt-1.5">Authenticity Index</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-6 bg-slate-50 border-t border-slate-200 print:hidden">
+              <span className="text-xs text-slate-600 font-semibold">
+                Admin Audit Verified Layout
+              </span>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center space-x-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all border border-slate-300 shadow-sm"
+                >
+                  <Printer size={15} />
+                  <span>Print Document</span>
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={downloading}
+                  className="flex items-center space-x-2 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold transition-all shadow-lg hover:shadow-xl"
+                >
+                  <Download size={15} className={downloading ? 'animate-bounce' : ''} />
+                  <span>{downloading ? 'Generating High-Res PDF...' : 'Download A4 PDF'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toastMessage && (
         <Toast

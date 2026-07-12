@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
 import { FolderKanban, CheckSquare, Trophy, ShieldAlert, Sparkles, Activity } from 'lucide-react';
 import Toast from '../../components/Toast';
+import AnnouncementsHub from '../../components/AnnouncementsHub';
 
 const ManagerDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -94,23 +95,26 @@ const ManagerDashboard = () => {
           return (
             <div 
               key={idx} 
-              className="p-6 rounded-3xl glass-card border flex items-center justify-between hover-scale glow-blue"
+              className="stat-badge-glow p-6 rounded-3xl glass-card-hover border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between hover:shadow-xl group transition-all duration-300 backdrop-blur-md"
             >
-              <div className="space-y-1">
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <div className="space-y-1 relative z-10">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider group-hover:text-emerald-500 transition-colors">
                   {card.title}
                 </span>
-                <p className="text-3xl font-extrabold tracking-tight font-sans text-slate-800 dark:text-white">
+                <p className="text-3xl font-black tracking-tight font-sans text-slate-800 dark:text-white mt-1">
                   {card.value}
                 </p>
               </div>
-              <div className={`p-4 rounded-2xl bg-gradient-to-br ${card.gradient}`}>
+              <div className={`p-4 rounded-2xl bg-gradient-to-br ${card.gradient} group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 relative z-10`}>
                 <Icon size={24} />
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Campus Bulletin */}
+      <AnnouncementsHub />
 
       {/* Detailed Content */}
       <div className="p-6 rounded-3xl glass-card border space-y-6">

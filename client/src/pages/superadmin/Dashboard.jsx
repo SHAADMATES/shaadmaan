@@ -9,15 +9,17 @@ import {
 import { Link } from 'react-router-dom';
 import Toast from '../../components/Toast';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import AnnouncementsHub from '../../components/AnnouncementsHub';
+import LiveActivityFeed from '../../components/LiveActivityFeed';
 
 const StatBadge = ({ label, value, icon: Icon, color, bg, border }) => (
-  <div className={`p-5 rounded-2xl ${bg} border ${border} flex items-center justify-between group hover:-translate-y-0.5 transition-all`}>
-    <div>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">{label}</p>
-      <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{value}</p>
+  <div className={`stat-badge-glow p-5 rounded-2xl ${bg} border ${border} flex items-center justify-between group hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 relative overflow-hidden backdrop-blur-md`}>
+    <div className="relative z-10">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5 group-hover:text-emerald-500 transition-colors">{label}</p>
+      <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{value}</p>
     </div>
-    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-      <Icon size={20} />
+    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color} shadow-sm group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 relative z-10`}>
+      <Icon size={22} />
     </div>
   </div>
 );
@@ -164,6 +166,12 @@ const SuperDashboard = () => {
           bg="bg-white dark:bg-slate-900"
           border="border-slate-200 dark:border-slate-800"
         />
+      </div>
+
+      {/* ── Real-Time Bulletin & Live Activity Ticker ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-6">
+        <AnnouncementsHub />
+        <LiveActivityFeed />
       </div>
 
       {/* ── Finance Overview + System Health ── */}
