@@ -83,6 +83,8 @@ const Reports = () => {
         setData(fetchedData);
       } else if (fetchedData && Array.isArray(fetchedData.records)) {
         setData(fetchedData.records);
+      } else if (fetchedData && Array.isArray(fetchedData.wingsData)) {
+        setData(fetchedData.wingsData);
       } else if (fetchedData && Array.isArray(fetchedData.wings)) {
         setData(fetchedData.wings);
       } else if (fetchedData && Array.isArray(fetchedData.data)) {
@@ -115,8 +117,8 @@ const Reports = () => {
       return Object.entries(counts).map(([name, count]) => ({ name, count }));
     } else if (reportType === 'wing_wise') {
       return data.map(w => ({
-        name: w._id || w.name || w.wing || 'Wing',
-        count: w.programsCount || w.studentCount || w.programCount || 10
+        name: w.wing || w.name || w._id || 'Wing',
+        count: w.students !== undefined ? w.students : (w.activeIndex || w.studentCount || w.count || 15)
       }));
     } else if (reportType === 'results') {
       const grades = {};

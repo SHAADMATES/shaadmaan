@@ -295,108 +295,115 @@ const ManageCertificates = () => {
             >
               <X size={20} />
             </button>
-
-            <div 
-              id="certificate-print-area" 
-              className="relative p-10 md:p-14 text-center overflow-hidden bg-white text-slate-900 font-sans border-[16px] border-double border-amber-600/90 m-4 shadow-inner"
-              style={{ minHeight: '620px' }}
-            >
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.04]">
-                <span className="text-8xl md:text-9xl font-serif font-black tracking-widest text-slate-900 -rotate-12">
-                  EXCELLENCE
-                </span>
-              </div>
-
-              <div className="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 border-amber-600/80" />
-              <div className="absolute top-4 right-4 w-12 h-12 border-t-4 border-r-4 border-amber-600/80" />
-              <div className="absolute bottom-4 left-4 w-12 h-12 border-b-4 border-l-4 border-amber-600/80" />
-              <div className="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 border-amber-600/80" />
-
-              <div className="relative z-10 flex flex-col items-center justify-center space-y-1 mb-6">
-                <div className="flex items-center space-x-2.5">
-                  <span className="text-4xl">🎓</span>
-                  <span className="text-2xl md:text-3xl font-black font-serif tracking-widest text-slate-900 uppercase">
-                    {localStorage.getItem('orgName') || 'SHAAD-MATES ACADEMY'}
+            <div className="overflow-x-auto flex justify-center p-4 bg-slate-900/10 rounded-3xl">
+              <div 
+                id="certificate-print-area" 
+                className="relative p-12 text-center overflow-hidden bg-white text-slate-900 font-sans border-[16px] border-double border-amber-600/90 shadow-2xl shrink-0 flex flex-col justify-between"
+                style={{ width: '1000px', height: '707px', margin: '0 auto' }}
+              >
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03]">
+                  <span className="text-9xl font-serif font-black tracking-widest text-slate-900 -rotate-12">
+                    EXCELLENCE
                   </span>
                 </div>
-                <p className="text-[11px] uppercase tracking-[0.3em] font-extrabold text-amber-700">
-                  Official Academic Merit & Excellence Credential
-                </p>
-              </div>
 
-              <div className="relative z-10 space-y-2 mb-8">
-                <h1 className="text-4xl md:text-6xl font-black tracking-tight font-serif text-slate-900 uppercase">
-                  Certificate of Merit
-                </h1>
-                <div className="w-48 h-1 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mt-2" />
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-500 font-bold pt-2">
-                  THIS IS TO CERTIFY WITH DISTINCTION THAT
-                </p>
-              </div>
+                <div className="absolute top-4 left-4 w-14 h-14 border-t-4 border-l-4 border-amber-600/80" />
+                <div className="absolute top-4 right-4 w-14 h-14 border-t-4 border-r-4 border-amber-600/80" />
+                <div className="absolute bottom-4 left-4 w-14 h-14 border-b-4 border-l-4 border-amber-600/80" />
+                <div className="absolute bottom-4 right-4 w-14 h-14 border-b-4 border-r-4 border-amber-600/80" />
 
-              <div className="relative z-10 py-3 max-w-2xl mx-auto mb-6">
-                <p className="text-3xl md:text-5xl font-extrabold text-slate-900 font-serif italic border-b-2 border-slate-300 pb-3 inline-block px-8">
-                  {selectedCert.studentId?.name || 'Authorized Member'}
-                </p>
-              </div>
-
-              <div className="relative z-10 max-w-2xl mx-auto space-y-3 text-slate-700 text-sm md:text-base leading-relaxed mb-10">
-                <p>
-                  has demonstrated outstanding performance and achieved <strong className="text-amber-700 font-black text-lg underline decoration-amber-500/50">{selectedCert.position} Place Standing</strong> in the competitive event
-                </p>
-                <p className="font-black text-xl md:text-2xl text-slate-900 uppercase tracking-wide">
-                  "{selectedCert.programId?.title || 'Program Event'}"
-                </p>
-                <p className="text-xs text-slate-500">
-                  Conducted under the auspices of the <strong className="text-slate-800">{selectedCert.programId?.wing || 'Department'} Wing</strong> on {selectedCert.programId?.date ? new Date(selectedCert.programId.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Academic Session'}.
-                </p>
-              </div>
-
-              {selectedCert.grade && (
-                <div className="relative z-10 inline-block px-5 py-2 rounded-full bg-slate-900 text-amber-300 font-extrabold text-xs uppercase tracking-widest shadow-lg mb-8">
-                  Award Classification: Grade {selectedCert.grade}
-                </div>
-              )}
-
-              <div className="relative z-10 grid grid-cols-3 gap-6 pt-6 max-w-3xl mx-auto items-end border-t border-slate-200">
-                <div className="flex flex-col items-center justify-end">
-                  {signatureUrl ? (
-                    <img src={signatureUrl} alt="Signature" className="max-h-12 object-contain mix-blend-multiply mb-1" />
-                  ) : (
-                    <div className="h-10 font-serif text-slate-800 italic text-sm flex items-end justify-center mb-1 font-bold">
-                      Dr. Faisal Rahman
-                    </div>
-                  )}
-                  <div className="w-full border-b border-slate-400" />
-                  <p className="text-[10px] text-slate-600 uppercase tracking-widest font-extrabold mt-1.5">Principal / Chairman Signatory</p>
+                {/* Top Header */}
+                <div className="relative z-10 flex flex-col items-center justify-center space-y-1">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-4xl">🎓</span>
+                    <span className="text-3xl font-black font-serif tracking-widest text-slate-900 uppercase">
+                      ACADEMIC EXCELLENCE ACADEMY
+                    </span>
+                  </div>
+                  <p className="text-[11px] uppercase tracking-[0.3em] font-extrabold text-amber-700">
+                    Official Merit & Achievement Credential
+                  </p>
                 </div>
 
-                <div className="flex flex-col items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 p-1 shadow-xl flex items-center justify-center text-white border-2 border-amber-300">
-                    <div className="w-full h-full rounded-full border border-amber-200/40 flex flex-col items-center justify-center p-1 text-center">
-                      <Sparkles size={14} className="mb-0.5" />
-                      <span className="text-[7px] font-black uppercase tracking-tighter leading-tight">OFFICIAL GOLD SEAL</span>
+                {/* Title */}
+                <div className="relative z-10 space-y-2">
+                  <h1 className="text-5xl font-black tracking-tight font-serif text-slate-900 uppercase">
+                    Certificate of Merit
+                  </h1>
+                  <div className="w-56 h-1.5 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mt-2" />
+                  <p className="text-xs uppercase tracking-[0.25em] text-slate-500 font-bold pt-1">
+                    THIS IS TO CERTIFY WITH DISTINCTION THAT
+                  </p>
+                </div>
+
+                {/* Student Name */}
+                <div className="relative z-10 py-2 max-w-3xl mx-auto">
+                  <p className="text-5xl font-extrabold text-slate-900 font-serif italic border-b-2 border-slate-300 pb-3 inline-block px-12 tracking-wide">
+                    {selectedCert.studentId?.name || 'Student Name'}
+                  </p>
+                </div>
+
+                {/* Citation & Program Details */}
+                <div className="relative z-10 max-w-2xl mx-auto space-y-2.5 text-slate-700 text-sm leading-relaxed">
+                  <p>
+                    has demonstrated outstanding performance and achieved <strong className="text-amber-700 font-black text-lg underline decoration-amber-500/50">{selectedCert.position} Place Standing</strong> in the competitive event
+                  </p>
+                  <p className="font-black text-2xl text-slate-900 uppercase tracking-wide">
+                    "{selectedCert.programId?.title || 'Program Event'}"
+                  </p>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Conducted under the auspices of the <strong className="text-slate-800">{selectedCert.programId?.wing || 'Department'} Wing</strong> on {selectedCert.programId?.date ? new Date(selectedCert.programId.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Academic Session'}.
+                  </p>
+                </div>
+
+                {/* Grade Classification Badge */}
+                {selectedCert.grade && (
+                  <div className="relative z-10 mx-auto w-fit px-6 py-1.5 rounded-full bg-slate-900 text-amber-300 font-extrabold text-xs uppercase tracking-widest shadow-lg">
+                    Award Classification: Grade {selectedCert.grade}
+                  </div>
+                )}
+
+                {/* Bottom Signatories & Gold Seal Box */}
+                <div className="relative z-10 grid grid-cols-3 gap-6 pt-4 max-w-4xl mx-auto items-end border-t border-slate-200 w-full">
+                  <div className="flex flex-col items-center justify-end">
+                    {signatureUrl ? (
+                      <img src={signatureUrl} alt="Signature" className="max-h-12 object-contain mix-blend-multiply mb-1" />
+                    ) : (
+                      <div className="h-10 font-serif text-slate-800 italic text-base flex items-end justify-center mb-1 font-bold">
+                        Principal Signatory
+                      </div>
+                    )}
+                    <div className="w-full border-b border-slate-400" />
+                    <p className="text-[10px] text-slate-600 uppercase tracking-widest font-extrabold mt-1.5">Principal / Chairman</p>
+                  </div>
+
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 p-1 shadow-xl flex items-center justify-center text-white border-2 border-amber-300">
+                      <div className="w-full h-full rounded-full border border-amber-200/40 flex flex-col items-center justify-center p-1 text-center">
+                        <Sparkles size={14} className="mb-0.5" />
+                        <span className="text-[7px] font-black uppercase tracking-tighter leading-tight">OFFICIAL GOLD SEAL</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex flex-col items-center justify-end text-right">
-                  <div className="flex items-center space-x-2 mb-1 justify-center w-full">
-                    <QrCode size={24} className="text-slate-800" />
-                    <div className="text-left font-mono text-[9px] text-slate-700 font-bold leading-tight">
-                      <p>VERIFICATION ID:</p>
-                      <p className="text-amber-700">{selectedCert.certificateId || 'VER-SM-2026-0001'}</p>
+                  <div className="flex flex-col items-center justify-end text-right">
+                    <div className="flex items-center space-x-2 mb-1 justify-center w-full">
+                      <QrCode size={24} className="text-slate-800" />
+                      <div className="text-left font-mono text-[9px] text-slate-700 font-bold leading-tight">
+                        <p>VERIFICATION ID:</p>
+                        <p className="text-amber-700">{selectedCert.certificateId || 'VER-ACAD-2026'}</p>
+                      </div>
                     </div>
+                    <div className="w-full border-b border-slate-400" />
+                    <p className="text-[10px] text-slate-600 uppercase tracking-widest font-extrabold mt-1.5">Authenticity Registry</p>
                   </div>
-                  <div className="w-full border-b border-slate-400" />
-                  <p className="text-[10px] text-slate-600 uppercase tracking-widest font-extrabold mt-1.5">Authenticity Index</p>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center justify-between p-6 bg-slate-50 border-t border-slate-200 print:hidden">
               <span className="text-xs text-slate-600 font-semibold">
-                Admin Audit Verified Layout
+                Verified Academic Layout (Exact A4 Landscape)
               </span>
               <div className="flex items-center space-x-3">
                 <button

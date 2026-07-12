@@ -277,18 +277,26 @@ const ManageStudents = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password || !name || !admissionNumber || !wing) {
-      setErrorMsg('Username, Password, Name, Admission No., and Wing are required.');
+    if (!name || !wing) {
+      setErrorMsg('Full Name and Academic Wing are required.');
       return;
     }
 
+    const timeHash = Date.now().toString().slice(-6);
+    const randNum = Math.floor(1000 + Math.random() * 9000);
+    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'student';
+
+    const finalAdmissionNo = admissionNumber?.trim() ? admissionNumber : `ADM-${timeHash}-${randNum}`;
+    const finalUsername = username?.trim() ? username : `${cleanName}_${randNum}`;
+    const finalPassword = password?.trim() ? password : 'Pass@123';
+
     const payload = {
-      username,
-      password,
+      username: finalUsername,
+      password: finalPassword,
       name,
-      admissionNumber,
+      admissionNumber: finalAdmissionNo,
       wing,
-      className,
+      className: className || 'Class XII',
       dob,
       phone,
       email,
@@ -304,12 +312,12 @@ const ManageStudents = () => {
       } else {
         await api.post('/admin/students', payload);
         setToastType('success');
-        setToastMessage(`Student "${name}" registered successfully.`);
+        setToastMessage(`Student "${name}" added instantly.`);
       }
       setIsOpen(false);
       fetchStudents();
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Operation failed. Verify username/admission uniqueness.');
+      setErrorMsg(err.response?.data?.message || 'Operation failed. Verify uniqueness.');
     }
   };
 
@@ -670,13 +678,13 @@ const ManageStudents = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 dark:text-slate-300">Admission Number *</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Admission Number (Optional - Auto ID)</label>
                   <input
                     type="text"
                     value={admissionNumber}
                     onChange={(e) => setAdmissionNumber(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-mono font-bold focus:outline-none focus:ring-2 focus:ring-royal/30"
-                    placeholder="ADM-2026-001"
+                    placeholder="Auto-generated if left empty"
                   />
                 </div>
 
@@ -761,30 +769,30 @@ const ManageStudents = () => {
 
                 <div className="space-y-1 border-t border-slate-100 dark:border-slate-800 pt-3 sm:col-span-2">
                   <h4 className="text-xs font-black text-royal uppercase tracking-wider mb-2 flex items-center">
-                    <Shield size={13} className="mr-1" /> Student Portal Login Credentials
+                    <Shield size={13} className="mr-1" /> Student Portal Login Credentials (Optional - Auto-Generated)
                   </h4>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 dark:text-slate-300">Portal Username *</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Portal Username (Optional)</label>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-mono font-bold focus:outline-none focus:ring-2 focus:ring-royal/30"
-                    placeholder="shaad_student_01"
+                    placeholder="Auto-generated if left empty"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 dark:text-slate-300">Portal Password *</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Portal Password (Optional)</label>
                   <div className="relative">
                     <input
                       type={showFormPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-mono font-bold focus:outline-none focus:ring-2 focus:ring-royal/30 pr-10"
-                      placeholder="••••••••"
+                      placeholder="Defaults to Pass@123 if empty"
                     />
                     <button
                       type="button"

@@ -35,8 +35,8 @@ const AddProgram = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !date || !time || !venue) {
-      setErrorMsg('Please enter all required fields.');
+    if (!title) {
+      setErrorMsg('Please enter a Program Title.');
       return;
     }
 
@@ -46,19 +46,19 @@ const AddProgram = () => {
     try {
       const payload = {
         title,
-        type,
-        date,
-        time,
-        venue,
-        description,
-        maxParticipants: Number(maxParticipants),
+        type: type || 'single',
+        date: date || new Date().toISOString().split('T')[0],
+        time: time || '10:00 AM',
+        venue: venue || 'Main Campus Auditorium',
+        description: description || 'Exciting wing competition.',
+        maxParticipants: Number(maxParticipants) || 100,
         rules
       };
 
       await api.post('/chairman/programs', payload);
       
       setToastType('success');
-      setToastMessage(`Program "${title}" proposed successfully! Waiting for Admin approval.`);
+      setToastMessage(`Program "${title}" proposed instantly! Waiting for Admin approval.`);
       
       // Reset
       setTitle('');

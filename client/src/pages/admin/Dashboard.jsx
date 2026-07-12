@@ -18,7 +18,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import Toast from '../../components/Toast';
-import AnnouncementsHub from '../../components/AnnouncementsHub';
+import UniversalExport from '../../components/UniversalExport';
 import LiveActivityFeed from '../../components/LiveActivityFeed';
 
 const StatCard = ({ title, value, icon: Icon, gradient, accent, change }) => (
@@ -179,9 +179,8 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* ── Real-Time Bulletin & Live Activity Ticker ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-6">
-        <AnnouncementsHub />
+      {/* ── Live Activity Ticker ── */}
+      <div className="my-6">
         <LiveActivityFeed />
       </div>
 

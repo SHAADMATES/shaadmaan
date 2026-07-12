@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
 import { Trophy, Calendar, CheckSquare, Award, Sparkles, Activity } from 'lucide-react';
 import Toast from '../../components/Toast';
-import AnnouncementsHub from '../../components/AnnouncementsHub';
 
 const StudentDashboard = () => {
   const [registrations, setRegistrations] = useState([]);
@@ -125,8 +124,6 @@ const StudentDashboard = () => {
         })}
       </div>
 
-      {/* Campus Bulletin */}
-      <AnnouncementsHub />
 
       {/* Detail Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

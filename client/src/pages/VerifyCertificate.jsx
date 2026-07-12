@@ -66,7 +66,7 @@ const VerifyCertificate = () => {
         <div className="flex items-center space-x-2">
           <span className="text-2xl">🎓</span>
           <span className="text-xl font-bold font-sans tracking-wide bg-gradient-to-r from-cyan to-royal-light bg-clip-text text-transparent">
-            Shaad-Mates Website
+            Academic Credential Verification
           </span>
         </div>
         <a href="/" className="text-sm font-semibold hover:text-royal transition-colors">
@@ -125,7 +125,7 @@ const VerifyCertificate = () => {
             <div className="text-center space-y-2">
               <span className="text-4xl">🎓</span>
               <h3 className="text-xl font-bold uppercase tracking-wider text-slate-400">Certificate of Achievement</h3>
-              <p className="text-xs text-slate-400">Shaad-Mates Academic Website Registry</p>
+              <p className="text-xs text-slate-400">Official Academic Excellence Registry</p>
             </div>
 
             {/* Body */}
@@ -165,7 +165,7 @@ const VerifyCertificate = () => {
                   </span>
                 )}
                 <div className="w-24 border-b border-slate-200 dark:border-slate-700"></div>
-                <p className="text-[10px] text-slate-400 mt-1">Shaad-Mates Admin Board</p>
+                <p className="text-[10px] text-slate-400 mt-1">Academic Board of Trustees</p>
               </div>
             </div>
 

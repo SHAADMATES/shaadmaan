@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
 import { FolderKanban, CheckSquare, Trophy, ShieldAlert, Sparkles, Activity } from 'lucide-react';
 import Toast from '../../components/Toast';
-import AnnouncementsHub from '../../components/AnnouncementsHub';
 
 const ManagerDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -113,8 +112,6 @@ const ManagerDashboard = () => {
         })}
       </div>
 
-      {/* Campus Bulletin */}
-      <AnnouncementsHub />
 
       {/* Detailed Content */}
       <div className="p-6 rounded-3xl glass-card border space-y-6">
