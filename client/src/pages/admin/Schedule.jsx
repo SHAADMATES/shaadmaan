@@ -146,7 +146,7 @@ const SchedulePage = () => {
             }))}
             filename={`ShaadMates_Schedule_${new Date().toISOString().slice(0, 10)}`}
             label="Export Schedule"
-            title="Shaad-Mates Master Program Schedule"
+            title="Shaad Mates Master Program Schedule"
             buttonClass="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs flex items-center transition-all shadow-md"
           />
 

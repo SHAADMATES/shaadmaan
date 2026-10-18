@@ -91,7 +91,7 @@ const MyResults = () => {
       <div className="glass-card border rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
         {/* Printable Header */}
         <div className="text-center border-b pb-6 border-slate-100 dark:border-slate-850">
-          <h2 className="text-xl font-extrabold font-sans">Shaad-Mates Student Performance Card</h2>
+          <h2 className="text-xl font-extrabold font-sans">Shaad Mates Student Performance Card</h2>
           <p className="text-xs font-semibold uppercase tracking-wider text-royal mt-1">Official Student Transcript</p>
           <p className="text-[10px] text-slate-400 mt-1">Date Printed: {new Date().toLocaleDateString()}</p>
         </div>

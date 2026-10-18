@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ShaadMatesLogo from './ShaadMatesLogo';
 import { 
   LayoutDashboard, 
   Users, 
@@ -121,12 +122,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Header Logo */}
-        <div className="flex items-center justify-between h-16 px-6 bg-slate-955 border-b border-slate-800">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl">🎓</span>
-            <span className="text-xl font-bold font-sans tracking-wide bg-gradient-to-r from-cyan to-royal-light bg-clip-text text-transparent">
-              Shaad-Mates
-            </span>
+        <div className="flex items-center justify-between h-16 px-4 bg-slate-950 border-b border-slate-800">
+          <div className="flex items-center space-x-2.5">
+            <ShaadMatesLogo size="xs" variant="emblem" />
+            <div className="flex flex-col">
+              <span className="text-base font-black font-serif tracking-tight text-white leading-tight">
+                Shaad Mates
+              </span>
+              <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-400 leading-none">
+                Academy Portal
+              </span>
+            </div>
           </div>
           <button onClick={toggleSidebar} className="p-1 rounded-lg text-slate-400 hover:text-white lg:hidden">
             <X size={20} />

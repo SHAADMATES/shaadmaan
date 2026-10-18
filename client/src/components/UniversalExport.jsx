@@ -7,7 +7,7 @@ const UniversalExport = ({
   headers = [], 
   label = 'Export',
   buttonClass = 'px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs flex items-center transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5',
-  title = 'Shaad-Mates Official Data Report'
+  title = 'Shaad Mates Official Data Report'
 }) => {
   const [exporting, setExporting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -61,7 +61,7 @@ const UniversalExport = ({
     
     // Enterprise Metadata Header Block
     let csvContent = '';
-    csvContent += `"SHAAD-MATES PROGRAM MANAGEMENT SYSTEM - OFFICIAL DATA EXPORT"\r\n`;
+    csvContent += `"SHAAD MATES PROGRAM MANAGEMENT SYSTEM - OFFICIAL DATA EXPORT"\r\n`;
     csvContent += `"Report Title:","${title.replace(/"/g, '""')}"\r\n`;
     csvContent += `"Export Timestamp:","${new Date().toLocaleString()}"\r\n`;
     csvContent += `"Database Source:","Supabase PostgreSQL Cloud Cluster (Connected)"\r\n`;
@@ -79,7 +79,7 @@ const UniversalExport = ({
 
     // Summary calculation footer if numeric columns exist
     csvContent += `\r\n`;
-    csvContent += `"--- END OF OFFICIAL EXPORT RECORD (SHAAD-MATES ERP AUTHENTICATED) ---"\r\n`;
+    csvContent += `"--- END OF OFFICIAL EXPORT RECORD (SHAAD MATES ERP AUTHENTICATED) ---"\r\n`;
 
     // \uFEFF is the UTF-8 Byte Order Mark that instructs Microsoft Excel, LibreOffice, and Numbers to open cleanly
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -158,7 +158,7 @@ const UniversalExport = ({
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(13);
       doc.setTextColor(255, 255, 255);
-      doc.text('SHAAD-MATES PROGRAM MANAGEMENT SYSTEM', 14, 12);
+      doc.text('SHAAD MATES PROGRAM MANAGEMENT SYSTEM', 14, 12);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
@@ -226,7 +226,7 @@ const UniversalExport = ({
           doc.setFontSize(7.5);
           doc.setTextColor(100, 116, 139); // Slate-500
           doc.text(
-            `Page ${pageData.pageNumber} of ${pageCount}  •  Shaad-Mates Authenticated Enterprise Document  •  Confidential`,
+            `Page ${pageData.pageNumber} of ${pageCount}  •  Shaad Mates Authenticated Enterprise Document  •  Confidential`,
             14,
             pageHeight - 7
           );

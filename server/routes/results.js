@@ -139,6 +139,35 @@ router.get('/wings/list', async (req, res) => {
   }
 });
 
+// @route   GET /api/results/wings
+// @desc    Get real wings framework data for public About and Home pages
+router.get('/wings', async (req, res) => {
+  try {
+    const wings = await prisma.wing.findMany({
+      orderBy: { name: 'asc' }
+    });
+
+    const chairmen = await prisma.wingChairman.findMany();
+
+    const enrichedWings = wings.map(w => {
+      const chairman = chairmen.find(c => c.id === w.chairmanId || c.wing?.trim().toLowerCase() === w.name?.trim().toLowerCase());
+      return {
+        id: w.id,
+        _id: w.id,
+        name: w.name,
+        description: w.description || `Wing coordinated by ${chairman?.name || 'Department Chair'}`,
+        chairmanName: chairman?.name || 'Wing Chairman',
+        assistantName: chairman?.assistantName || '',
+        logo: w.logo || ''
+      };
+    });
+
+    res.json(enrichedWings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving wings directory.', error: error.message });
+  }
+});
+
 // @route   GET /api/results/:programId
 // @desc    Get results standings for a specific program
 router.get('/:programId', async (req, res) => {

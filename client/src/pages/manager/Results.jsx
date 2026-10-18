@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Toast from '../../components/Toast';
 import UniversalExport from '../../components/UniversalExport';
+import ShaadMatesLogo from '../../components/ShaadMatesLogo';
 
 const ManagerResults = () => {
   const [activeTab, setActiveTab] = useState('list'); // 'list' or 'publish'
@@ -352,6 +353,25 @@ const ManagerResults = () => {
 
               return (
                 <div key={resObj._id || resObj.id} className="p-6 rounded-3xl glass-card border space-y-4 shadow border-slate-200/50 print:border-b-2 print:border-black">
+                  {/* Official Institution Print Banner */}
+                  <div className="hidden print:flex items-center justify-between pb-3 mb-2 border-b-2 border-slate-900">
+                    <div className="flex items-center space-x-3">
+                      <ShaadMatesLogo size="sm" variant="emblem" />
+                      <div>
+                        <h1 className="text-lg font-black font-serif tracking-tight text-slate-900">
+                          SHAAD MATES
+                        </h1>
+                        <p className="text-[9px] font-extrabold uppercase tracking-widest text-slate-600">
+                          Islamic Educational Academy • Certified Standing Result Sheet
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right text-[9px] text-slate-600 font-medium">
+                      <p>Printed: {new Date().toLocaleString()}</p>
+                      <p>Database: Supabase PostgreSQL (Live)</p>
+                    </div>
+                  </div>
+
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b dark:border-slate-800 pb-3 gap-2">
                     <div>
                       <span className="text-[10px] font-bold text-royal dark:text-cyan uppercase tracking-wider">
@@ -387,7 +407,7 @@ const ManagerResults = () => {
                     {resObj.winners.map((winner, idx) => (
                       <div 
                         key={idx} 
-                        className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border dark:border-slate-800/60 flex items-center justify-between hover-scale"
+                        className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border dark:border-slate-800/60 flex items-center justify-between hover-scale print:border-slate-300"
                       >
                         <div className="space-y-1">
                           <div className="flex items-center space-x-1.5">
@@ -403,18 +423,19 @@ const ManagerResults = () => {
                             <span className="text-[10px] font-semibold text-slate-500">Grade: {winner.grade}</span>
                           </div>
                           
-                          <h4 className="font-bold text-sm text-slate-800 dark:text-slate-100 mt-1 truncate max-w-[170px]">
+                          <h4 className="font-bold text-sm text-slate-800 dark:text-slate-100 mt-1 truncate max-w-[170px] print:max-w-none print:whitespace-normal print:overflow-visible print:text-slate-950">
                             {winner.studentId?.name || winner.groupId?.name || 'Candidate'}
                           </h4>
-                          <p className="text-[11px] text-slate-400 font-mono">
+                          <p className="text-[11px] text-slate-400 font-mono print:text-slate-700">
                             {winner.studentId?.studentId ? `ID: ${winner.studentId.studentId}` : ''}
+                            {winner.studentId?.wing ? ` • ${winner.studentId.wing} Wing` : ''}
                           </p>
-                          <p className="text-[10px] text-slate-500 italic truncate max-w-[170px]">"{winner.remarks || 'Honored candidate.'}"</p>
+                          <p className="text-[10px] text-slate-500 italic truncate max-w-[170px] print:max-w-none print:whitespace-normal">"{winner.remarks || 'Honored candidate.'}"</p>
                         </div>
 
-                        <div className="text-right pl-2">
+                        <div className="text-right pl-2 shrink-0">
                           <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Points</div>
-                          <div className="text-xl font-black text-royal dark:text-cyan">+{winner.points}</div>
+                          <div className="text-xl font-black text-royal dark:text-cyan print:text-slate-900">+{winner.points}</div>
                           <div className="text-[10px] text-slate-400 font-mono">{winner.marks} marks</div>
                         </div>
                       </div>
@@ -558,10 +579,13 @@ const ManagerResults = () => {
                               <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                 Position
                               </label>
+                              <div className="hidden print:block font-bold text-slate-900 text-xs py-1">
+                                {winner.position || 'N/A'}
+                              </div>
                               <select
                                 value={winner.position}
                                 onChange={(e) => handleWinnerFieldChange(idx, 'position', e.target.value)}
-                                className="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl font-bold text-slate-800 dark:text-slate-100 text-xs"
+                                className="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl font-bold text-slate-800 dark:text-slate-100 text-xs print:hidden"
                               >
                                 <option value="1st">🥇 1st Place</option>
                                 <option value="2nd">🥈 2nd Place</option>
@@ -572,14 +596,32 @@ const ManagerResults = () => {
                               </select>
                             </div>
 
-                            {/* Recipient candidate selection (ALL STUDENTS SHOWN) */}
+                            {/* Recipient candidate selection (ALL STUDENTS SHOWN & PRINTABLE) */}
                             <div className="sm:col-span-4 space-y-1">
                               <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
                                 <span>Candidate Student (All Candidates) *</span>
-                                <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">
+                                <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold print:hidden">
                                   {filteredCandidates.length} Available
                                 </span>
                               </label>
+
+                              {/* Print view: Bold Candidate Name and ID for official hardcopy */}
+                              <div className="hidden print:block py-1">
+                                {selectedStudent ? (
+                                  <div className="text-slate-900">
+                                    <span className="font-extrabold text-sm">{selectedStudent.name}</span>
+                                    <div className="text-[11px] font-semibold text-slate-600">
+                                      ID: {selectedStudent.studentId} • {selectedStudent.wing || 'Campus'} Wing • {selectedStudent.className || 'Class XII'}
+                                    </div>
+                                  </div>
+                                ) : registrations.find(r => (r.groupId?._id || r.groupId?.id) === winner.groupId) ? (
+                                  <div className="text-slate-900 font-extrabold text-sm">
+                                    Team: {registrations.find(r => (r.groupId?._id || r.groupId?.id) === winner.groupId)?.groupId?.name}
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-400 italic text-xs">Candidate not designated</span>
+                                )}
+                              </div>
                               
                               <select
                                 value={winner.studentId || winner.groupId}
@@ -594,7 +636,7 @@ const ManagerResults = () => {
                                     handleWinnerFieldChange(idx, 'groupId', '');
                                   }
                                 }}
-                                className="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100"
+                                className="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 print:hidden"
                               >
                                 <option value="">-- Choose Any Candidate Student --</option>
                                 
@@ -618,7 +660,7 @@ const ManagerResults = () => {
                               </select>
 
                               {selectedStudent && (
-                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold truncate pt-0.5">
+                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold truncate pt-0.5 print:hidden">
                                   ✓ Selected: {selectedStudent.name} ({selectedStudent.wing || 'General'} Wing)
                                 </p>
                               )}
@@ -629,11 +671,14 @@ const ManagerResults = () => {
                               <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center block">
                                 Grade
                               </label>
+                              <div className="hidden print:block font-bold text-slate-900 text-xs py-1 text-center">
+                                {winner.grade || '-'}
+                              </div>
                               <input
                                 type="text"
                                 value={winner.grade}
                                 onChange={(e) => handleWinnerFieldChange(idx, 'grade', e.target.value)}
-                                className="w-full px-2 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-center font-bold text-xs"
+                                className="w-full px-2 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-center font-bold text-xs print:hidden"
                                 placeholder="A+"
                               />
                             </div>
@@ -643,11 +688,14 @@ const ManagerResults = () => {
                               <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center block">
                                 Marks
                               </label>
+                              <div className="hidden print:block font-bold text-slate-900 text-xs py-1 text-center">
+                                {winner.marks || '0'}
+                              </div>
                               <input
                                 type="number"
                                 value={winner.marks}
                                 onChange={(e) => handleWinnerFieldChange(idx, 'marks', e.target.value)}
-                                className="w-full px-2 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-center text-xs"
+                                className="w-full px-2 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-center text-xs print:hidden"
                                 min="0"
                                 max="100"
                               />
@@ -658,11 +706,14 @@ const ManagerResults = () => {
                               <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center block text-royal dark:text-cyan">
                                 Points
                               </label>
+                              <div className="hidden print:block font-black text-slate-900 text-xs py-1 text-center">
+                                +{winner.points || '0'}
+                              </div>
                               <input
                                 type="number"
                                 value={winner.points}
                                 onChange={(e) => handleWinnerFieldChange(idx, 'points', e.target.value)}
-                                className="w-full px-2 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-center font-black text-royal dark:text-cyan text-xs"
+                                className="w-full px-2 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-center font-black text-royal dark:text-cyan text-xs print:hidden"
                                 min="0"
                               />
                             </div>
@@ -672,11 +723,14 @@ const ManagerResults = () => {
                               <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                 Remarks
                               </label>
+                              <div className="hidden print:block font-medium text-slate-700 text-xs py-1">
+                                {winner.remarks || '-'}
+                              </div>
                               <input
                                 type="text"
                                 value={winner.remarks}
                                 onChange={(e) => handleWinnerFieldChange(idx, 'remarks', e.target.value)}
-                                className="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-xs"
+                                className="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-900 rounded-xl text-xs print:hidden"
                                 placeholder="e.g. Excellent delivery"
                               />
                             </div>

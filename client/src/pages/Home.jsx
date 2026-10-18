@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Toast from '../components/Toast';
+import ShaadMatesLogo from '../components/ShaadMatesLogo';
 
 const Home = () => {
   const { user } = useAuth();
@@ -32,7 +33,7 @@ const Home = () => {
   const [loadingPerformers, setLoadingPerformers] = useState(true);
 
   // Custom brand states
-  const [orgName, setOrgName] = useState(localStorage.getItem('orgName') || 'Shaad-Mates WebSuite');
+  const [orgName, setOrgName] = useState(localStorage.getItem('orgName') || 'Shaad Mates');
   const [orgLogo, setOrgLogo] = useState(localStorage.getItem('orgLogo') || '🎓');
 
   // Verification Results
@@ -63,7 +64,7 @@ const Home = () => {
 
     // Listen to storage changes to update branding
     const handleStorageChange = () => {
-      setOrgName(localStorage.getItem('orgName') || 'Shaad-Mates WebSuite');
+      setOrgName(localStorage.getItem('orgName') || 'Shaad Mates');
       setOrgLogo(localStorage.getItem('orgLogo') || '🎓');
     };
     window.addEventListener('storage', handleStorageChange);
@@ -106,12 +107,15 @@ const Home = () => {
       {/* --- Glassmorphism Header --- */}
       <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-6 md:px-16 bg-[#050B14]/60 backdrop-blur-2xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300">
         <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-xl shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
-            {orgLogo}
+          <ShaadMatesLogo size="sm" variant="emblem" className="group-hover:scale-105 transition-transform" />
+          <div className="flex flex-col text-left">
+            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-200 bg-clip-text text-transparent group-hover:to-cyan-300 transition-all font-serif">
+              Shaad Mates
+            </span>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-400 leading-none">
+              Islamic Educational Academy
+            </span>
           </div>
-          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent group-hover:to-cyan-200 transition-all">
-            {orgName}
-          </span>
         </div>
         <nav className="flex items-center space-x-8">
           <Link to="/about" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors tracking-wide hidden md:block">About Us</Link>
@@ -143,8 +147,9 @@ const Home = () => {
       <main className="relative z-10 flex-1 flex flex-col items-center px-6 md:px-12 pt-32 pb-24 text-center max-w-7xl mx-auto w-full">
         
         {/* Hero Section */}
-        <div className="space-y-8 max-w-5xl mt-8 mb-20 animate-fade-in-up">
-          <div className="flex justify-center">
+        <div className="space-y-8 max-w-5xl mt-6 mb-20 animate-fade-in-up">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <ShaadMatesLogo size="hero" variant="full" className="drop-shadow-2xl hover:scale-105 transition-transform" />
             <span className="inline-flex items-center space-x-2 px-4 py-2 text-xs font-bold bg-blue-500/10 border border-blue-500/20 text-cyan-400 rounded-full uppercase tracking-widest backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)]">
               <Sparkles size={14} className="text-yellow-400 animate-spin-slow" /> 
               <span>Open Campus Extramural ERP</span>

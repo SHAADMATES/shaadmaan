@@ -436,7 +436,7 @@ const ManageStudents = () => {
                 Email: s.email || 'N/A',
                 Wing: s.wing || 'No Wing'
               }))}
-              filename="ShaadMates_Students_Registry.csv"
+              filename="ShaadMates_Students_Registry"
               label="Export Registry"
               title="STUDENT REGISTRY & CREDENTIALS AUDIT"
               buttonClass="flex items-center space-x-1.5 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white text-xs font-bold rounded-2xl shadow-md glow-emerald transition-all"

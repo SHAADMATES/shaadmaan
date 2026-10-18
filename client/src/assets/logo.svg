@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" fill="none" className="shaad-mates-logo">
+  <defs>
+    <linearGradient id="goldGradAsset" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C158"/>
+      <stop offset="50%" stop-color="#C5A059"/>
+      <stop offset="100%" stop-color="#9E782F"/>
+    </linearGradient>
+    <linearGradient id="navyGradAsset" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#142B47"/>
+      <stop offset="100%" stop-color="#0A1C2E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- LEFT CREST: ISLAMIC ARCH & SM EMBLEM -->
+  <g transform="translate(20, 10)">
+    <path d="M 80 8 C 45 8, 20 32, 20 75 L 20 135 L 30 135 L 30 75 C 30 38, 50 18, 80 18 C 110 18, 130 38, 130 75 L 130 135 L 140 135 L 140 75 C 140 32, 115 8, 80 8 Z" fill="url(#navyGradAsset)" stroke="url(#goldGradAsset)" stroke-width="1.5"/>
+    <path d="M 80 14 Q 52 28 32 60 L 32 135 L 42 135 L 42 66 Q 58 38 80 24 Q 102 38 118 66 L 118 135 L 128 135 L 128 60 Q 108 28 80 14 Z" fill="none" stroke="url(#goldGradAsset)" stroke-width="1.5"/>
+
+    <g transform="translate(80, 52) scale(0.9)">
+      <polygon points="0,-18 5,-7 17,-17 7,-5 18,0 7,5 17,17 5,7 0,18 -5,7 -17,17 -7,5 -18,0 -7,-5 -17,-17 -5,-7" fill="url(#goldGradAsset)"/>
+      <circle cx="0" cy="0" r="5" fill="#0A1C2E" stroke="url(#goldGradAsset)" stroke-width="1.2"/>
+      <path d="M 0 -24 L 8 -16 L 24 -16 L 16 -8 L 24 0 L 16 8 L 24 16 L 8 16 L 0 24 L -8 16 L -24 16 L -16 8 L -24 0 L -16 -8 L -24 -16 L -8 -16 Z" fill="none" stroke="url(#goldGradAsset)" stroke-width="1.2" opacity="0.85"/>
+      <path d="M -16 -24 L 0 -14 L 16 -24 L 26 -14 L 16 0 L 26 14 L 16 24 L 0 14 L -16 24 L -26 14 L -16 0 L -26 -14 Z" fill="none" stroke="url(#navyGradAsset)" stroke-width="1.2" opacity="0.75"/>
+    </g>
+
+    <path d="M 42 85 L 82 85 L 82 97 L 57 97 L 82 120 L 82 136 L 42 136 L 42 124 L 67 124 L 42 101 Z" fill="url(#navyGradAsset)"/>
+    <path d="M 78 85 L 94 85 L 105 106 L 116 85 L 126 85 L 126 136 L 114 136 L 114 104 L 105 122 L 94 104 L 94 136 L 78 136 Z" fill="url(#navyGradAsset)"/>
+
+    <path d="M 80 142 Q 52 132 16 146 Q 50 158 80 146 Q 110 158 144 146 Q 108 132 80 142 Z" fill="url(#navyGradAsset)"/>
+    <path d="M 80 148 Q 52 138 12 154 Q 50 166 80 154 Q 110 166 148 154 Q 108 138 80 148 Z" fill="url(#goldGradAsset)"/>
+    <path d="M 80 156 Q 52 146 18 162 Q 50 174 80 162 Q 110 174 142 162 Q 108 146 80 156 Z" fill="url(#navyGradAsset)"/>
+    <polygon points="80,146 76,176 84,176" fill="url(#goldGradAsset)"/>
+  </g>
+
+  <!-- VERTICAL GOLD DIVIDER -->
+  <g transform="translate(195, 30)">
+    <line x1="0" y1="5" x2="0" y2="135" stroke="url(#goldGradAsset)" stroke-width="1.5"/>
+    <polygon points="0,0 4,-5 0,-10 -4,-5" fill="url(#goldGradAsset)"/>
+    <polygon points="0,70 6,64 0,58 -6,64" fill="url(#goldGradAsset)"/>
+    <polygon points="0,140 4,145 0,150 -4,145" fill="url(#goldGradAsset)"/>
+  </g>
+
+  <!-- RIGHT TYPOGRAPHY -->
+  <g transform="translate(225, 40)">
+    <text x="0" y="44" font-family="'Cinzel', 'Playfair Display', 'Times New Roman', 'Outfit', serif" font-size="44" font-weight="900" fill="url(#navyGradAsset)" letter-spacing="2">
+      SHAAD MATES
+    </text>
+
+    <g transform="translate(4, 76)">
+      <polygon points="4,12 8,7 4,2 0,7" fill="url(#goldGradAsset)"/>
+      <line x1="16" y1="7" x2="55" y2="7" stroke="url(#goldGradAsset)" stroke-width="1.2"/>
+      <text x="68" y="16" font-family="'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif" font-size="34" font-weight="bold" fill="url(#navyGradAsset)">
+        شَاد مَاتس
+      </text>
+    </g>
+
+    <g transform="translate(4, 118)">
+      <line x1="0" y1="-8" x2="260" y2="-8" stroke="url(#goldGradAsset)" stroke-width="0.8" opacity="0.6"/>
+      <text x="0" y="8" font-family="'Outfit', 'Inter', sans-serif" font-size="12.5" font-weight="700" fill="url(#navyGradAsset)" letter-spacing="4.5">
+        ISLAMIC EDUCATIONAL ACADEMY
+      </text>
+      <line x1="0" y1="18" x2="180" y2="18" stroke="url(#goldGradAsset)" stroke-width="1"/>
+    </g>
+  </g>
+</svg>

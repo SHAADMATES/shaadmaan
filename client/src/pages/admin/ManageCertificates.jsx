@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
 import { Award, CheckCircle, XCircle, Search, RefreshCw, Eye, Sparkles, Filter, Download, Printer, X, QrCode, FileText } from 'lucide-react';
 import Toast from '../../components/Toast';
+import UniversalExport from '../../components/UniversalExport';
 
 const ManageCertificates = () => {
   const [certificates, setCertificates] = useState([]);
@@ -163,7 +164,7 @@ const ManageCertificates = () => {
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
           <div className="flex items-center space-x-2">
             <Filter size={14} className="text-slate-400" />
             <select
@@ -176,6 +177,32 @@ const ManageCertificates = () => {
               <option value="pending">Pending Approval</option>
             </select>
           </div>
+
+          <UniversalExport
+            data={filteredCerts.map(c => ({
+              CertID: c.certificateId,
+              Student: c.studentId?.name || 'Student',
+              AdmissionNo: c.studentId?.admissionNumber || '',
+              Program: c.programId?.title || 'Program',
+              Wing: c.programId?.wing || 'Wing',
+              Position: c.position,
+              Status: c.approved ? 'Approved' : 'Pending',
+              IssueDate: c.issueDate ? new Date(c.issueDate).toLocaleDateString() : 'N/A'
+            }))}
+            filename={`ShaadMates_Certificates_${new Date().toISOString().slice(0, 10)}`}
+            label="Export Registry"
+            title="Shaad Mates Certificate Moderation Registry"
+            buttonClass="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl text-xs flex items-center transition-all shadow-sm"
+          />
+
+          <button
+            onClick={() => window.print()}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center space-x-1"
+            title="Print Certificates Registry"
+          >
+            <Printer size={13} />
+            <span>Print</span>
+          </button>
 
           <button
             onClick={fetchCertificatesAndSettings}

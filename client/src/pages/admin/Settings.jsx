@@ -7,7 +7,7 @@ const SettingsPage = () => {
   const { darkMode, toggleDarkMode } = useAuth();
   
   // Organization settings
-  const [orgName, setOrgName] = useState(localStorage.getItem('orgName') || 'Shaad-Mates Website');
+  const [orgName, setOrgName] = useState(localStorage.getItem('orgName') || 'Shaad Mates');
   const [orgLogo, setOrgLogo] = useState(localStorage.getItem('orgLogo') || '🎓');
   const [orgEmail, setOrgEmail] = useState(localStorage.getItem('orgEmail') || 'admin@shaadmates.com');
   const [signatureUrl, setSignatureUrl] = useState('');
@@ -27,13 +27,13 @@ const SettingsPage = () => {
       try {
         const res = await api.get('/admin/settings');
         if (res.data) {
-          setOrgName(res.data.orgName || 'Shaad-Mates Website');
+          setOrgName(res.data.orgName || 'Shaad Mates');
           setOrgLogo(res.data.orgLogo || '🎓');
           setOrgEmail(res.data.orgEmail || 'admin@shaadmates.com');
           setSignatureUrl(res.data.signatureUrl || '');
           
           // Sync to localStorage
-          localStorage.setItem('orgName', res.data.orgName || 'Shaad-Mates Website');
+          localStorage.setItem('orgName', res.data.orgName || 'Shaad Mates');
           localStorage.setItem('orgLogo', res.data.orgLogo || '🎓');
           localStorage.setItem('orgEmail', res.data.orgEmail || 'admin@shaadmates.com');
           localStorage.setItem('signatureUrl', res.data.signatureUrl || '');
