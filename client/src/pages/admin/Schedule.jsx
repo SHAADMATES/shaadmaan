@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
-import { Calendar, Plus, Edit2, Trash2, X, AlertCircle } from 'lucide-react';
+import { Calendar, Plus, Edit2, Trash2, X, AlertCircle, Printer } from 'lucide-react';
 import Toast from '../../components/Toast';
+import UniversalExport from '../../components/UniversalExport';
 
 const SchedulePage = () => {
   const [schedules, setSchedules] = useState([]);
@@ -133,12 +134,37 @@ const SchedulePage = () => {
           </div>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="px-5 py-2.5 bg-royal hover:bg-royal-dark text-white font-semibold rounded-2xl shadow hover:shadow-lg flex items-center justify-center transition-all glow-blue"
-        >
-          <Plus size={16} className="mr-2" /> Schedule Program
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <UniversalExport
+            data={schedules.map(s => ({
+              Program: s.programId?.title || 'Program',
+              Wing: s.programId?.wing || 'Wing',
+              Date: s.date ? new Date(s.date).toLocaleDateString() : 'TBD',
+              Time: s.time || 'TBD',
+              Venue: s.venue || 'Campus',
+              Notes: s.description || 'N/A'
+            }))}
+            filename={`ShaadMates_Schedule_${new Date().toISOString().slice(0, 10)}`}
+            label="Export Schedule"
+            title="Shaad-Mates Master Program Schedule"
+            buttonClass="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs flex items-center transition-all shadow-md"
+          />
+
+          <button
+            onClick={() => window.print()}
+            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl text-xs flex items-center transition-all shadow-md"
+            title="Print Schedule Timetable"
+          >
+            <Printer size={15} className="mr-1.5" /> Print Timetable
+          </button>
+
+          <button
+            onClick={handleOpenAdd}
+            className="px-5 py-2.5 bg-royal hover:bg-royal-dark text-white font-semibold rounded-2xl shadow hover:shadow-lg flex items-center justify-center transition-all glow-blue text-xs"
+          >
+            <Plus size={16} className="mr-1.5" /> Schedule Program
+          </button>
+        </div>
       </div>
 
       {/* Main Timetable listing */}

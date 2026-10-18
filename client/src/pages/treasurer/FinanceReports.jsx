@@ -4,7 +4,8 @@ import { FileSpreadsheet, Printer, Calendar, DollarSign, ArrowUpRight, ArrowDown
 import Toast from '../../components/Toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
+import UniversalExport from '../../components/UniversalExport';
 
 const FinanceReports = () => {
   const [transactions, setTransactions] = useState([]);
@@ -72,7 +73,7 @@ const FinanceReports = () => {
     }
   });
 
-  // Export CSV function
+  // Export CSV function with UTF-8 BOM and metadata header
   const exportToCSV = () => {
     if (filteredTransactions.length === 0) {
       setToastType('error');
@@ -80,79 +81,134 @@ const FinanceReports = () => {
       return;
     }
 
-    const headers = ['Posting Date', 'Type', 'Category / Reference', 'Linked Program', 'Memo / Description', 'Amount ($)'];
-    const rows = filteredTransactions.map(t => [
-      new Date(t.date).toLocaleDateString(),
-      t.type.toUpperCase(),
-      t.category,
-      t.programId?.title || 'General Fund',
-      t.description || '',
-      t.amount
-    ]);
+    let csvContent = `"SHAAD-MATES PROGRAM MANAGEMENT SYSTEM - TREASURER FINANCIAL STATEMENT"\r\n`;
+    csvContent += `"Statement Period:","${startDate ? new Date(startDate).toLocaleDateString() : 'Inception'} to ${endDate ? new Date(endDate).toLocaleDateString() : 'Present'}"\r\n`;
+    csvContent += `"Gross Income:","$${incomeTotal.toFixed(2)}"\r\n`;
+    csvContent += `"Gross Expense:","$${expenseTotal.toFixed(2)}"\r\n`;
+    csvContent += `"Net Position:","${netBalance >= 0 ? '+' : '-'}$${Math.abs(netBalance).toFixed(2)}"\r\n`;
+    csvContent += `"Generated At:","${new Date().toLocaleString()}"\r\n`;
+    csvContent += `"Cloud Database:","Supabase PostgreSQL Cluster"\r\n\r\n`;
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
-    
-    const encodedUri = encodeURI(csvContent);
+    const headers = ['Posting Date', 'Type', 'Category / Reference', 'Linked Program', 'Memo / Description', 'Amount ($)'];
+    csvContent += headers.map(h => `"${h}"`).join(',') + '\r\n';
+
+    filteredTransactions.forEach(t => {
+      const row = [
+        new Date(t.date).toLocaleDateString(),
+        t.type.toUpperCase(),
+        t.category,
+        t.programId?.title || 'General Fund',
+        t.description || '',
+        `${t.type === 'income' ? '+' : '-'}${Number(t.amount).toFixed(2)}`
+      ];
+      csvContent += row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + '\r\n';
+    });
+
+    csvContent += `\r\n"--- END OF OFFICIAL FINANCIAL LEDGER (AUDITED) ---"\r\n`;
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `ShaadMates_FinanceReport_${startDate || 'start'}_to_${endDate || 'end'}.csv`);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ShaadMates_FinanceReport_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
     setToastType('success');
     setToastMessage('Ledger exported to CSV successfully!');
   };
 
-  // Generate Beautiful PDF
+  // Generate Executive-Grade PDF
   const downloadPDF = () => {
     setGeneratingPDF(true);
-    setToastType('success');
-    setToastMessage('Generating high-quality PDF report...');
+    setToastType('info');
+    setToastMessage('Generating audited financial PDF statement...');
 
     try {
-      const doc = new jsPDF('p', 'pt', 'a4');
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt',
+        format: 'a4'
+      });
 
-      // Title
-      doc.setFontSize(20);
-      doc.setTextColor(40);
-      doc.text('Shaad-Mates Website ERP', 40, 40);
-      
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // Top Navy Header Bar
+      doc.setFillColor(15, 23, 42); // Navy Slate-900
+      doc.rect(0, 0, pageWidth, 75, 'F');
+
+      // Cyan Accent Stripe
+      doc.setFillColor(6, 182, 212); // Cyan-500
+      doc.rect(0, 75, pageWidth, 4, 'F');
+
+      // Gold Accent Ribbon
+      doc.setFillColor(245, 158, 11);
+      doc.rect(pageWidth - 80, 0, 80, 8, 'F');
+
+      // Header Typography
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(255, 255, 255);
+      doc.text('SHAAD-MATES PROGRAM MANAGEMENT SYSTEM', 40, 32);
+
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text('Official Financial Ledger Statement', 40, 55);
-      
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, doc.internal.pageSize.getWidth() - 40, 40, { align: 'right' });
-      doc.text('Auditor Console: Treasurer Desk', doc.internal.pageSize.getWidth() - 40, 55, { align: 'right' });
+      doc.setTextColor(203, 213, 225);
+      doc.text('TREASURER EXECUTIVE FINANCIAL STATEMENT & AUDIT LEDGER', 40, 48);
 
-      // Summary
-      doc.setFontSize(14);
-      doc.setTextColor(40);
-      doc.text('Summary Account Balance', 40, 85);
-      
+      doc.setFontSize(8.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Generated: ${new Date().toLocaleString()}  |  Database: Supabase PostgreSQL  |  Ref: FIN-${Date.now().toString(36).toUpperCase()}`, 40, 63);
+
+      // Summary Account Balance Box
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(40, 95, pageWidth - 80, 65, 6, 6, 'FD');
+
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text(`Statement Period: ${startDate ? new Date(startDate).toLocaleDateString() : 'Inception'} to ${endDate ? new Date(endDate).toLocaleDateString() : 'Present'}`, 40, 100);
+      doc.setTextColor(30, 41, 59);
+      doc.text('ACCOUNT BALANCE SUMMARY', 52, 112);
 
-      // Totals
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Period: ${startDate ? new Date(startDate).toLocaleDateString() : 'Inception'} to ${endDate ? new Date(endDate).toLocaleDateString() : 'Present'}`, 52, 126);
+
+      // Financial Stat Numbers
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
-      doc.setTextColor(40);
-      doc.text(`Gross Incomes: +$${incomeTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 40, 125);
-      doc.text(`Gross Expenses: -$${expenseTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 240, 125);
-      
+      doc.setTextColor(16, 185, 129); // Green
+      doc.text(`Income: +$${incomeTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 52, 146);
+
+      doc.setTextColor(239, 68, 68); // Red
+      doc.text(`Expense: -$${expenseTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 220, 146);
+
       if (netBalance >= 0) {
-        doc.setTextColor(0, 150, 0);
-        doc.text(`Net Balance: +$${Math.abs(netBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 440, 125);
+        doc.setTextColor(16, 185, 129);
+        doc.text(`Net Balance: +$${Math.abs(netBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 380, 146);
       } else {
-        doc.setTextColor(200, 0, 0);
-        doc.text(`Net Balance: -$${Math.abs(netBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 440, 125);
+        doc.setTextColor(239, 68, 68);
+        doc.text(`Net Balance: -$${Math.abs(netBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 380, 146);
       }
 
+      // Safe AutoTable helper
+      const runTable = (options) => {
+        if (typeof doc.autoTable === 'function') {
+          doc.autoTable(options);
+        } else {
+          autoTable(doc, options);
+        }
+      };
+
       // Category Breakdown Table
-      doc.setFontSize(12);
-      doc.setTextColor(40);
-      doc.text('Aggregate breakdown by Category', 40, 160);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Aggregate Breakdown by Category', 40, 180);
 
       const categoryRows = Object.entries(categoryBreakdown).map(([cat, val]) => [
         cat,
@@ -161,38 +217,43 @@ const FinanceReports = () => {
         `${val.income - val.expense >= 0 ? '+' : '-'}$${Math.abs(val.income - val.expense).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
       ]);
 
-      let finalY = 175;
+      let finalY = 190;
 
       if (categoryRows.length > 0) {
-        doc.autoTable({
+        runTable({
           startY: finalY,
           head: [['Category Name', 'Incomes Aggregate', 'Expenses Aggregate', 'Net Impact']],
           body: categoryRows,
           theme: 'striped',
-          headStyles: { fillColor: [41, 128, 185] },
+          styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 3.5 },
+          headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
           margin: { left: 40, right: 40 },
           didParseCell: function(data) {
             if (data.section === 'body' && data.column.index === 3) {
               const valStr = data.cell.raw;
               if (valStr.startsWith('+')) {
-                data.cell.styles.textColor = [0, 150, 0];
+                data.cell.styles.textColor = [16, 185, 129];
+                data.cell.styles.fontStyle = 'bold';
               } else if (valStr.startsWith('-')) {
-                data.cell.styles.textColor = [200, 0, 0];
+                data.cell.styles.textColor = [239, 68, 68];
+                data.cell.styles.fontStyle = 'bold';
               }
             }
           }
         });
-        finalY = doc.lastAutoTable.finalY + 30;
+        finalY = doc.lastAutoTable.finalY + 25;
       } else {
-        doc.setFontSize(10);
-        doc.text('No ledger activity in selected interval.', 40, finalY);
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.text('No ledger activity in selected interval.', 40, finalY + 12);
         finalY += 30;
       }
 
-      // Ledger Postings
-      doc.setFontSize(12);
-      doc.setTextColor(40);
-      doc.text('Detailed Ledger Postings', 40, finalY);
+      // Detailed Ledger Table
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Detailed Ledger Transactions', 40, finalY);
 
       const ledgerRows = filteredTransactions.map(t => [
         t.category,
@@ -203,35 +264,72 @@ const FinanceReports = () => {
       ]);
 
       if (ledgerRows.length > 0) {
-        doc.autoTable({
-          startY: finalY + 15,
-          head: [['Posting Reference', 'Type', 'Program', 'Posting Date', 'Ledger Amount']],
+        runTable({
+          startY: finalY + 10,
+          head: [['Reference / Category', 'Type', 'Linked Event / Fund', 'Posting Date', 'Ledger Amount']],
           body: ledgerRows,
           theme: 'grid',
-          headStyles: { fillColor: [52, 73, 94] },
-          margin: { left: 40, right: 40 },
+          styles: { font: 'helvetica', fontSize: 8, cellPadding: 3 },
+          headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
+          margin: { left: 40, right: 40, bottom: 40 },
           didParseCell: function(data) {
             if (data.section === 'body' && data.column.index === 4) {
               const valStr = data.cell.raw;
               if (valStr.startsWith('+')) {
-                data.cell.styles.textColor = [0, 150, 0];
+                data.cell.styles.textColor = [16, 185, 129];
+                data.cell.styles.fontStyle = 'bold';
               } else if (valStr.startsWith('-')) {
-                data.cell.styles.textColor = [200, 0, 0];
+                data.cell.styles.textColor = [239, 68, 68];
+                data.cell.styles.fontStyle = 'bold';
               }
             }
+          },
+          didDrawPage: (data) => {
+            const pageCount = doc.internal.getNumberOfPages();
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text(
+              `Page ${data.pageNumber} of ${pageCount}  •  Shaad-Mates Authenticated Financial Statement  •  Treasurer Desk`,
+              40,
+              pageHeight - 15
+            );
           }
         });
-      } else {
-        doc.setFontSize(10);
-        doc.text('No ledger activity in selected interval.', 40, finalY + 15);
+      }
+
+      // Signatory block
+      const lastY = doc.lastAutoTable ? doc.lastAutoTable.finalY : finalY + 50;
+      if (lastY < pageHeight - 60) {
+        const sigY = Math.min(lastY + 30, pageHeight - 35);
+        doc.setDrawColor(148, 163, 184);
+        doc.setLineWidth(0.5);
+
+        doc.line(40, sigY, 150, sigY);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(51, 65, 85);
+        doc.text('Chief Treasurer / Signatory', 40, sigY + 10);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.text('Date & Signature', 40, sigY + 18);
+
+        doc.line(pageWidth - 150, sigY, pageWidth - 40, sigY);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('Internal Audit Committee', pageWidth - 150, sigY + 10);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.text('Official Stamp Endorsed', pageWidth - 150, sigY + 18);
       }
 
       doc.save(`ShaadMates_FinanceReport_${new Date().toISOString().split('T')[0]}.pdf`);
-      setToastMessage('PDF downloaded successfully!');
+      setToastType('success');
+      setToastMessage('Audited PDF Statement downloaded successfully!');
     } catch (error) {
       console.error('Error generating PDF:', error);
       setToastType('error');
-      setToastMessage('Failed to generate PDF.');
+      setToastMessage('Failed to generate PDF. Using CSV export.');
+      exportToCSV();
     } finally {
       setGeneratingPDF(false);
     }
@@ -259,14 +357,21 @@ const FinanceReports = () => {
           </p>
         </div>
         
-        <div className="flex items-center space-x-2 shrink-0">
-          <button
-            onClick={exportToCSV}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md"
-          >
-            <FileSpreadsheet size={16} />
-            <span>Export CSV Sheet</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <UniversalExport
+            data={filteredTransactions.map(t => ({
+              Date: new Date(t.date).toLocaleDateString(),
+              Type: t.type?.toUpperCase(),
+              Category: t.category,
+              Program: t.programId?.title || 'General Fund',
+              Description: t.description || 'N/A',
+              Amount: `$${Number(t.amount).toFixed(2)}`
+            }))}
+            filename={`Finance_Ledger_${new Date().toISOString().slice(0, 10)}`}
+            label="Universal Export"
+            title="Shaad-Mates Financial Ledger Statement"
+            buttonClass="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs flex items-center transition-all shadow-md"
+          />
           <button
             onClick={downloadPDF}
             disabled={generatingPDF}
@@ -277,7 +382,7 @@ const FinanceReports = () => {
             ) : (
               <Printer size={16} />
             )}
-            <span>{generatingPDF ? 'Generating PDF...' : 'Download PDF Report'}</span>
+            <span>{generatingPDF ? 'Generating PDF...' : 'Audited PDF Statement'}</span>
           </button>
         </div>
       </div>

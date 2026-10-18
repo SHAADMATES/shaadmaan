@@ -30,7 +30,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'shaad-mates-jwt-secret-key-2026',
       { expiresIn: '1d' }
     );
 

@@ -252,20 +252,22 @@ label {
 
 /* Global Print Styles */
 @media print {
-  /* Hide navigation, sidebar, and buttons */
-  nav, aside, button, .no-print {
+  /* Hide navigation, sidebar, and controls */
+  nav, aside, button, .print\:hidden, .no-print {
     display: none !important;
   }
 
-  /* Reset backgrounds and shadows for clean printing */
-  body, main, .glass-card, .bg-slate-50, .dark\:bg-slate-900, .bg-gradient-to-br {
-    background: white !important;
-    box-shadow: none !important;
-    border: none !important;
-    color: black !important;
+  /* Preserve colors and backgrounds for certificates, ID cards, and official reports */
+  *, *:before, *:after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  /* Adjust main layout width */
+  body, html {
+    background: white !important;
+    color: #0f172a !important;
+  }
+
   main {
     padding: 0 !important;
     margin: 0 !important;
@@ -273,13 +275,7 @@ label {
     max-width: 100% !important;
   }
 
-  /* Ensure text is black for contrast */
-  * {
-    color: black !important;
-    text-shadow: none !important;
-  }
-
-  /* Force tables and lists to not break across pages */
+  /* Force tables and lists to not break awkwardly across pages */
   table, tr, td, th, .page-break-inside-avoid {
     page-break-inside: avoid;
   }

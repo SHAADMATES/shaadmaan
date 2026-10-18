@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
-import { Check, X, Trash2, Search, Filter, AlertCircle, Info, Calendar, MapPin, Shield, Send, Sparkles, LayoutGrid, Table as TableIcon, Bell, CheckCircle2, Clock } from 'lucide-react';
+import { Check, X, Trash2, Search, Filter, AlertCircle, Info, Calendar, MapPin, Shield, Send, Sparkles, LayoutGrid, Table as TableIcon, Bell, CheckCircle2, Clock, Printer } from 'lucide-react';
 import Toast from '../../components/Toast';
+import UniversalExport from '../../components/UniversalExport';
 
 const ManagePrograms = () => {
   const [programs, setPrograms] = useState([]);
@@ -173,6 +174,33 @@ const ManagePrograms = () => {
               <option value="approved">Approved</option>
               <option value="pending">Pending</option>
             </select>
+          </div>
+
+          {/* Universal Export & Print Controls */}
+          <div className="flex items-center gap-2 shrink-0 self-end lg:self-auto">
+            <UniversalExport
+              data={filteredPrograms.map(p => ({
+                Title: p.title,
+                Wing: p.wing || 'General Wing',
+                Type: (p.type || 'Solo').toUpperCase(),
+                Date: p.date ? new Date(p.date).toLocaleDateString() : 'TBD',
+                Time: p.time || 'TBD',
+                Venue: p.venue || 'Auditorium',
+                Status: p.approved ? 'Approved' : 'Pending Review'
+              }))}
+              filename={`ShaadMates_Programs_${new Date().toISOString().slice(0, 10)}`}
+              label="Export Catalog"
+              title="Shaad-Mates Academic Programs Catalog"
+              buttonClass="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs flex items-center transition-all shadow-md"
+            />
+            <button
+              onClick={() => window.print()}
+              className="px-3.5 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all shadow-md flex items-center space-x-1.5"
+              title="Print Programs Catalog"
+            >
+              <Printer size={14} />
+              <span>Print</span>
+            </button>
           </div>
 
           {/* View Mode Toggle */}

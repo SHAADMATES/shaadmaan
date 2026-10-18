@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
-import { ArrowRight, Trophy, Users, ShieldCheck, Calendar, Sparkles, CheckCircle2 } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Trophy, 
+  Users, 
+  ShieldCheck, 
+  Calendar, 
+  Sparkles, 
+  CheckCircle2, 
+  Medal, 
+  Award, 
+  Star,
+  Flame,
+  TrendingUp,
+  FolderKanban,
+  GraduationCap
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Toast from '../components/Toast';
 
@@ -11,8 +26,13 @@ const Home = () => {
   const [wings, setWings] = useState([]);
   const [certId, setCertId] = useState('');
   
+  // Top performers and leaderboards
+  const [topPerformers, setTopPerformers] = useState([]);
+  const [wingStandings, setWingStandings] = useState([]);
+  const [loadingPerformers, setLoadingPerformers] = useState(true);
+
   // Custom brand states
-  const [orgName, setOrgName] = useState(localStorage.getItem('orgName') || 'Shaad-Mates Website');
+  const [orgName, setOrgName] = useState(localStorage.getItem('orgName') || 'Shaad-Mates WebSuite');
   const [orgLogo, setOrgLogo] = useState(localStorage.getItem('orgLogo') || '🎓');
 
   // Verification Results
@@ -24,19 +44,26 @@ const Home = () => {
   const [toastType, setToastType] = useState('success');
 
   useEffect(() => {
-    const fetchWings = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get('/results/wings/list');
-        setWings(res.data);
+        const [wingsRes, perfRes] = await Promise.all([
+          api.get('/results/wings/list'),
+          api.get('/results/top-performers').catch(() => ({ data: { topStudents: [], wingStandings: [] } }))
+        ]);
+        setWings(wingsRes.data || []);
+        setTopPerformers(perfRes.data?.topStudents || []);
+        setWingStandings(perfRes.data?.wingStandings || []);
       } catch (err) {
-        console.error('Failed to load public wings data.', err);
+        console.error('Failed to load public landing data.', err);
+      } finally {
+        setLoadingPerformers(false);
       }
     };
-    fetchWings();
+    fetchData();
 
     // Listen to storage changes to update branding
     const handleStorageChange = () => {
-      setOrgName(localStorage.getItem('orgName') || 'Shaad-Mates Website');
+      setOrgName(localStorage.getItem('orgName') || 'Shaad-Mates WebSuite');
       setOrgLogo(localStorage.getItem('orgLogo') || '🎓');
     };
     window.addEventListener('storage', handleStorageChange);
@@ -77,8 +104,8 @@ const Home = () => {
       </div>
 
       {/* --- Glassmorphism Header --- */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-6 md:px-16 bg-[#050B14]/40 backdrop-blur-2xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300">
-        <div className="flex items-center space-x-3 group cursor-pointer">
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-6 md:px-16 bg-[#050B14]/60 backdrop-blur-2xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300">
+        <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => navigate('/')}>
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-xl shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
             {orgLogo}
           </div>
@@ -116,23 +143,23 @@ const Home = () => {
       <main className="relative z-10 flex-1 flex flex-col items-center px-6 md:px-12 pt-32 pb-24 text-center max-w-7xl mx-auto w-full">
         
         {/* Hero Section */}
-        <div className="space-y-8 max-w-5xl mt-12 mb-24 animate-fade-in-up">
+        <div className="space-y-8 max-w-5xl mt-8 mb-20 animate-fade-in-up">
           <div className="flex justify-center">
-            <span className="inline-flex items-center space-x-2 px-4 py-2 text-xs font-bold bg-blue-500/10 border border-blue-500/20 text-cyan-400 rounded-full uppercase tracking-widest backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)] animate-pulse-slow">
-              <Sparkles size={14} className="text-yellow-400" /> 
-              <span>State-of-the-Art ERP Architecture</span>
+            <span className="inline-flex items-center space-x-2 px-4 py-2 text-xs font-bold bg-blue-500/10 border border-blue-500/20 text-cyan-400 rounded-full uppercase tracking-widest backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+              <Sparkles size={14} className="text-yellow-400 animate-spin-slow" /> 
+              <span>Open Campus Extramural ERP</span>
             </span>
           </div>
           
           <h1 className="text-5xl sm:text-7xl lg:text-[5.5rem] font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-2xl">
-            Elevate the Academic <br className="hidden md:block" />
+            Elevate Academic & <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 animate-gradient-x">
-              Experience
+              Extracurricular Glory
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto font-medium leading-relaxed mt-6">
-            A unified, premium ecosystem to orchestrate student activities, manage wing operations, trace financial ledgers, and issue mathematically verified merit certificates.
+          <p className="text-lg sm:text-xl text-slate-350 max-w-3xl mx-auto font-medium leading-relaxed mt-6 text-slate-400">
+            A unified ecosystem for students and faculty. Experience open participation with zero registration friction, real-time standings, transparent treasury controls, and cryptographic credentials.
           </p>
 
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center items-center pt-8">
@@ -140,23 +167,130 @@ const Home = () => {
               to={user ? '/student/dashboard' : '/login'}
               className="w-full sm:w-auto px-10 py-4 font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_50px_rgba(6,182,212,0.5)] hover:-translate-y-1 flex items-center justify-center text-lg group"
             >
-              Enter Registration Portal <ArrowRight size={20} className="ml-3 group-hover:translate-x-2 transition-transform" />
+              Enter Portal <ArrowRight size={20} className="ml-3 group-hover:translate-x-2 transition-transform" />
             </Link>
             <Link
-              to="/verify-certificate"
+              to="/about"
               className="w-full sm:w-auto px-10 py-4 font-bold bg-white/5 border border-white/10 hover:bg-white/10 text-slate-200 rounded-2xl transition-all duration-300 backdrop-blur-md hover:-translate-y-1 justify-center flex items-center text-lg"
             >
-              Verify Certificate
+              Learn About Us
             </Link>
           </div>
         </div>
 
+        {/* --- Top Performers / Student Hall of Fame Section --- */}
+        <section className="w-full mt-12 mb-20 animate-fade-in-up">
+          <div className="text-center mb-10 space-y-3">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-gold text-xs font-bold uppercase tracking-wider">
+              <Flame size={14} className="text-gold" />
+              <span>Hall of Fame</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Top Student Achievers</h2>
+            <p className="text-sm text-slate-400 max-w-xl mx-auto">
+              Celebrating our leading scholars and competitors ranked by official competition points and standings across all active wings.
+            </p>
+          </div>
+
+          {loadingPerformers ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-56 rounded-3xl bg-white/5 border border-white/5 animate-pulse"></div>
+              ))}
+            </div>
+          ) : topPerformers.length === 0 ? (
+            <div className="p-12 rounded-3xl bg-white/5 border border-white/5 text-center space-y-2">
+              <Trophy size={40} className="mx-auto text-gold/40" />
+              <h4 className="text-base font-bold text-slate-300">New Tournament Season Open</h4>
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                First standings of the academic year are currently being calculated. Attend upcoming challenges to earn top positions!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+              {topPerformers.slice(0, 6).map((student, idx) => {
+                const isFirst = idx === 0;
+                const isSecond = idx === 1;
+                const isThird = idx === 2;
+
+                const medalColor = isFirst 
+                  ? 'from-yellow-400 to-amber-600 text-yellow-950 shadow-yellow-500/30' 
+                  : isSecond 
+                  ? 'from-slate-200 to-slate-400 text-slate-900 shadow-slate-400/20' 
+                  : isThird 
+                  ? 'from-amber-600 to-amber-800 text-amber-100 shadow-amber-700/20' 
+                  : 'from-blue-600 to-cyan-600 text-white shadow-blue-500/20';
+
+                return (
+                  <div 
+                    key={student._id || student.id || idx}
+                    className={`relative p-6 rounded-[2rem] bg-gradient-to-b from-white/[0.07] to-white/[0.02] border ${
+                      isFirst ? 'border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.15)]' : 'border-white/10'
+                    } backdrop-blur-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between`}
+                  >
+                    {/* Rank Badge */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${medalColor} flex items-center justify-center font-extrabold text-base shadow-lg`}>
+                          {isFirst ? '1st' : isSecond ? '2nd' : isThird ? '3rd' : `#${idx + 1}`}
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+                            {student.name}
+                          </h4>
+                          <span className="text-xs text-slate-400 font-mono">
+                            {student.studentId} • {student.className || 'Senior Division'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-xs text-slate-400 font-medium">Merit Points</div>
+                        <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-300">
+                          {student.totalPoints}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Wing Badge & Standings count */}
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+                      <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-semibold uppercase tracking-wider text-[10px]">
+                        {student.wing} Wing
+                      </span>
+                      
+                      <div className="flex items-center space-x-2 text-slate-300 text-[11px]">
+                        {student.firstPlaces > 0 && (
+                          <span className="flex items-center gap-0.5 text-yellow-400 font-bold">
+                            🥇 {student.firstPlaces}
+                          </span>
+                        )}
+                        {student.secondPlaces > 0 && (
+                          <span className="flex items-center gap-0.5 text-slate-300 font-bold">
+                            🥈 {student.secondPlaces}
+                          </span>
+                        )}
+                        {student.thirdPlaces > 0 && (
+                          <span className="flex items-center gap-0.5 text-amber-500 font-bold">
+                            🥉 {student.thirdPlaces}
+                          </span>
+                        )}
+                        {student.firstPlaces === 0 && student.secondPlaces === 0 && student.thirdPlaces === 0 && (
+                          <span className="text-slate-400">Enrolled Candidate</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
         {/* Feature Grid & Verifier Layout */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mt-12 animate-fade-in-up animation-delay-300">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mt-4 animate-fade-in-up animation-delay-300">
           
           {/* Certificate Verifier (Left Column) */}
           <div className="lg:col-span-5 flex flex-col justify-center">
-            <div className="relative p-8 rounded-[2rem] bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden group hover:border-cyan-500/30 transition-colors duration-500">
+            <div className="relative p-8 rounded-[2rem] bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden group hover:border-cyan-500/30 transition-colors duration-500 text-left">
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl transition-opacity group-hover:opacity-100 opacity-50"></div>
               
               <div className="space-y-2 mb-8 relative z-10">
@@ -167,7 +301,7 @@ const Home = () => {
                   <span>Instant Verification</span>
                 </h3>
                 <p className="text-sm text-slate-400 leading-relaxed pl-[3.25rem]">
-                  Cryptographically validate official credentials immediately without logging into the system.
+                  Cryptographically validate official student credentials immediately without logging into the system.
                 </p>
               </div>
 
@@ -218,14 +352,14 @@ const Home = () => {
           </div>
 
           {/* Feature Highlight Cards (Right Column) */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
             <div className="p-8 rounded-[2rem] bg-gradient-to-b from-white/5 to-transparent border border-white/5 hover:bg-white/10 transition-colors duration-300 flex flex-col justify-center">
               <div className="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6 border border-blue-500/30 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
                 <Trophy size={26} />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Score & Standing Tracking</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Open Merit & Standings</h3>
               <p className="text-sm text-slate-400 leading-relaxed">
-                Log program points, monitor global leaderboards, and issue immutable credentials to top performers.
+                Log program points, monitor global leaderboards, and issue immutable credentials to top performers without registration barriers.
               </p>
             </div>
 
@@ -263,9 +397,8 @@ const Home = () => {
             <p className="text-slate-400 max-w-xl mx-auto">Collaborative nodes directing specialized student portfolios and events.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
             {wings.length === 0 ? (
-              // Empty State Placeholders
               [1, 2, 3, 4].map((i) => (
                 <div key={i} className="h-64 rounded-3xl bg-white/5 border border-white/5 animate-pulse flex items-center justify-center flex-col space-y-4">
                   <div className="w-16 h-16 bg-white/10 rounded-2xl"></div>

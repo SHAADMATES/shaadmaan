@@ -6,6 +6,21 @@ const router = express.Router();
 
 router.use(protect, authorize('wing_chairman'));
 
+// @route   GET /api/chairman/students
+// @desc    Get all candidates/students for results assignment
+router.get('/students', async (req, res) => {
+  try {
+    const students = await prisma.student.findMany({
+      include: { user: { select: { username: true } } },
+      orderBy: { name: 'asc' }
+    });
+    const mapped = students.map(s => ({ ...s, userId: s.user }));
+    res.json(mapped);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching students.', error: error.message });
+  }
+});
+
 // @route   POST /api/chairman/programs
 // @desc    Propose program
 router.post('/programs', async (req, res) => {

@@ -93,7 +93,6 @@ const ManageOutreach = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete outreach record for "${name}"?`)) return;
     try {
       await api.delete(`/admin/outreach/${id}`);
       showToast('Record deleted.');
@@ -114,11 +113,11 @@ const ManageOutreach = () => {
       r.programType,
       r.position
     ]);
-    let csv = headers.join(',') + '\n';
+    let csv = headers.join(',') + '\r\n';
     rows.forEach(row => {
-      csv += row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + '\n';
+      csv += row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + '\r\n';
     });
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

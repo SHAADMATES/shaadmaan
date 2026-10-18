@@ -1,0 +1,8 @@
+{
+  "name": "Shaad-Mates Program Management System",
+  "description": "Streamlining program registrations, schedules, and wing-wise results for students and administrators.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

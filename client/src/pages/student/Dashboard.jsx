@@ -4,7 +4,7 @@ import { Trophy, Calendar, CheckSquare, Award, Sparkles, Activity } from 'lucide
 import Toast from '../../components/Toast';
 
 const StudentDashboard = () => {
-  const [registrations, setRegistrations] = useState([]);
+  const [programs, setPrograms] = useState([]);
   const [results, setResults] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,14 +16,14 @@ const StudentDashboard = () => {
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
-        const regRes = await api.get('/student/registrations/my');
-        setRegistrations(regRes.data);
-
-        const resRes = await api.get('/student/results/my');
-        setResults(resRes.data);
-
-        const schRes = await api.get('/student/schedules');
-        setSchedules(schRes.data);
+        const [progRes, resRes, schRes] = await Promise.all([
+          api.get('/student/programs').catch(() => ({ data: [] })),
+          api.get('/student/results/my').catch(() => ({ data: [] })),
+          api.get('/student/schedules').catch(() => ({ data: [] }))
+        ]);
+        setPrograms(progRes.data || []);
+        setResults(resRes.data || []);
+        setSchedules(schRes.data || []);
       } catch (err) {
         console.error(err);
         setToastType('error');
@@ -50,31 +50,31 @@ const StudentDashboard = () => {
 
   // Calculate stats
   const totalPoints = results.reduce((acc, curr) => acc + (curr.points || 0), 0);
-  const registeredCount = registrations.length;
+  const openEventsCount = programs.length;
   const positionsCount = results.filter(r => ['1st', '2nd', '3rd'].includes(r.position)).length;
   const completedCount = results.length;
 
   const cards = [
     { 
-      title: 'Total Points', 
+      title: 'Total Merit Points', 
       value: totalPoints, 
       icon: Award, 
       gradient: 'from-amber-500/10 to-gold/10 text-gold-dark' 
     },
     { 
-      title: 'Registered Programs', 
-      value: registeredCount, 
+      title: 'Open Campus Events', 
+      value: openEventsCount, 
       icon: CheckSquare, 
       gradient: 'from-blue-500/10 to-royal/10 text-royal dark:text-cyan-light' 
     },
     { 
-      title: 'Completed Programs', 
+      title: 'Events Participated', 
       value: completedCount, 
       icon: Trophy, 
       gradient: 'from-cyan-500/10 to-cyan/10 text-cyan dark:text-cyan-light' 
     },
     { 
-      title: 'Achieved Standings', 
+      title: 'Podium Standings', 
       value: positionsCount, 
       icon: Activity, 
       gradient: 'from-emerald-500/10 to-emerald/10 text-emerald' 
@@ -94,7 +94,7 @@ const StudentDashboard = () => {
             Your Shaad-Mates Dashboard
           </h2>
           <p className="text-sm md:text-base text-slate-200/90 max-w-2xl font-light">
-            Stay active! Check out available events, coordinate group registrations with fellow members, track your calendar, and review your performance standings.
+            Stay active! Explore upcoming campus events, participate freely without pre-registration bottlenecks, track your schedule, and celebrate your verified merit standings.
           </p>
         </div>
       </div>

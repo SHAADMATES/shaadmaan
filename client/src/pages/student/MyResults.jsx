@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
 import { Trophy, Award, Printer, RefreshCw } from 'lucide-react';
 import Toast from '../../components/Toast';
+import UniversalExport from '../../components/UniversalExport';
 
 const MyResults = () => {
   const [results, setResults] = useState([]);
@@ -55,17 +56,34 @@ const MyResults = () => {
           </div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between shadow">
+        <div className="p-6 rounded-3xl bg-white/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 flex flex-col justify-between shadow space-y-3">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Export Results</span>
-            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Download Transcript</p>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Official Transcript</span>
+            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Export & Print Records</p>
           </div>
-          <button
-            onClick={handlePrintReport}
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl flex items-center shadow transition-all"
-          >
-            <Printer size={14} className="mr-1.5" /> Print Report
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <UniversalExport
+              data={results.map(r => ({
+                Program: r.program?.title || 'Program',
+                Wing: r.program?.wing || 'Wing',
+                Position: r.position,
+                Grade: r.grade,
+                Marks: r.marks,
+                Points: r.points,
+                Remarks: r.remarks || 'Completed'
+              }))}
+              filename={`Academic_Transcript_${new Date().toISOString().slice(0, 10)}`}
+              label="Export"
+              title="Official Student Performance Transcript"
+              buttonClass="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl text-xs flex items-center transition-all shadow-md"
+            />
+            <button
+              onClick={handlePrintReport}
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl flex items-center shadow transition-all"
+            >
+              <Printer size={13} className="mr-1.5" /> Print
+            </button>
+          </div>
         </div>
       </div>
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../context/AuthContext';
-import { Calendar, Clock, MapPin, RefreshCw } from 'lucide-react';
+import { Calendar, Clock, MapPin, RefreshCw, Printer } from 'lucide-react';
 import Toast from '../../components/Toast';
+import UniversalExport from '../../components/UniversalExport';
 
 const ManagerSchedule = () => {
   const [schedules, setSchedules] = useState([]);
@@ -24,8 +25,48 @@ const ManagerSchedule = () => {
     fetchSchedules();
   }, []);
 
+  const exportData = schedules.map(sch => ({
+    Program: sch.programId?.title || 'Program Event',
+    Date: new Date(sch.date).toLocaleDateString(),
+    Time: sch.time || 'TBD',
+    Venue: sch.venue || 'Campus Auditorium',
+    Instructions: sch.description || 'N/A'
+  }));
+
   return (
     <div className="p-6 space-y-6 animate-scale">
+      {/* Header bar */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b dark:border-slate-800 pb-4 gap-3 print:border-b-2 print:border-black">
+        <div>
+          <h2 className="text-xl font-bold flex items-center space-x-2 text-slate-800 dark:text-white">
+            <Calendar className="text-royal" />
+            <span>Wing Program Timelines</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            View scheduled program slots, venues, and timings for your wing.
+          </p>
+        </div>
+
+        {schedules.length > 0 && (
+          <div className="flex items-center space-x-2 print:hidden">
+            <UniversalExport
+              data={exportData}
+              filename={`Wing_Schedule_${new Date().toISOString().slice(0, 10)}`}
+              label="Export Schedule"
+              title="Shaad-Mates Wing Program Schedule"
+              buttonClass="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs flex items-center transition-all shadow-md"
+            />
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl text-xs flex items-center transition-all shadow-md"
+              title="Print Schedule"
+            >
+              <Printer size={14} className="mr-1.5" /> Print Sheet
+            </button>
+          </div>
+        )}
+      </div>
+
       {loading ? (
         <div className="p-12 text-center text-slate-400">
           <RefreshCw className="animate-spin mx-auto mb-4 text-slate-450" size={28} />

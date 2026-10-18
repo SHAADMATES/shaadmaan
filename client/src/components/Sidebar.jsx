@@ -79,10 +79,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   const studentLinks = [
     { to: '/student/dashboard', label: 'Student Dashboard', icon: LayoutDashboard },
-    { to: '/student/available-programs', label: 'Available Activities', icon: FolderKanban },
-    { to: '/student/my-registrations', label: 'My Registrations', icon: CheckSquare },
+    { to: '/student/available-programs', label: 'Programs & Events', icon: FolderKanban },
     { to: '/student/schedule', label: 'Timeline Schedule', icon: Calendar },
-    { to: '/student/my-results', label: 'My Results', icon: Trophy },
+    { to: '/student/my-results', label: 'My Standings & Points', icon: Trophy },
     { to: '/student/certificates', label: 'My Certificates', icon: Award },
     { to: '/student/profile', label: 'Profile Settings', icon: UserCircle },
   ];
